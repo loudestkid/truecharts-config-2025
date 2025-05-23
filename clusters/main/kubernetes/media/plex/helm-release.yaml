@@ -13,11 +13,6 @@ spec:
                 kind: HelmRepository
                 name: truecharts
                 namespace: flux-system
-            install:
-                createNamespace: true
-                crds: CreateReplace
-                remediation:
-                    retries: 3
     releaseName: plex
     values:
         TZ: America/Chicago
