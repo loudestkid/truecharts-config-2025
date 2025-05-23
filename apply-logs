@@ -1,0 +1,528 @@
+[andrew@ajewell-lf-2025]~/Documents/code/truecharts-config-2025% clustertool talos apply
+
+
+  _______               _____ _                _
+ |__   __|             / ____| |              | |
+    | |_ __ _   _  ___| |    | |__   __ _ _ __| |_ ___
+    | | '__| | | |/ _ \ |    | '_ \ / _` | '__| __/ __|
+    | | |  | |_| |  __/ |____| | | | (_| | |  | |_\__ \
+    |_|_|   \__,_|\___|\_____|_| |_|\__,_|_|   \__|___/
+          _______         __         ______          __
+         / ___/ /_ _____ / /____ ___/_  __/__  ___  / /
+        / /__/ / // (_-</ __/ -_) __// / / _ \/ _ \/ /
+        \___/_/\_,_/___/\__/\__/_/  /_/  \___/\___/_/
+
+
+---
+Clustertool Version: 2.0.0
+---
+2025-05-22T21:49:53-05:00 INF Checking if System Time is correct...
+2025-05-22T21:49:53-05:00 INF System Time is correct...
+2025-05-22T21:49:53-05:00 INF Cluster name: main
+
+2025-05-22T21:49:53-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:49:53-05:00 INF All files decrypted successfully
+2025-05-22T21:49:53-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:49:53-05:00 INF Checking if first node   is ready to recieve anything... 192.168.1.81
+2025-05-22T21:49:53-05:00 INF Healthcheck: Waiting for Node 192.168.1.81 to reach status: , running, maintenance
+2025-05-22T21:49:53-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:49:56-05:00 INF Successfully retrieved node status with insecure flag
+2025-05-22T21:49:56-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:49:56-05:00 INF Successfully retrieved node status with insecure flag
+2025-05-22T21:49:56-05:00 INF Checking if bootstrap is needed node=192.168.1.81
+2025-05-22T21:49:56-05:00 WRN Error running command, checking for certificate issue error="exit status 1" output="rpc error: code = Unavailable desc = connection error: desc = \"transport: authentication handshake failed: tls: failed to verify certificate: x509: certificate signed by unknown authority\"\n"
+2025-05-22T21:49:56-05:00 INF Node is in maintenance; bootstrap needed
+2025-05-22T21:49:56-05:00 INF First Node requires to be bootstrapped before it can be used.
+Do you want to bootstrap now? (yes/no) [y/n]: y
+2025-05-22T21:50:09-05:00 INF Nothing to decrypt
+2025-05-22T21:50:09-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:50:09-05:00 INF All files decrypted successfully
+2025-05-22T21:50:09-05:00 INF Healthcheck: Waiting for Node 192.168.1.81 to reach status: , maintenance
+2025-05-22T21:50:09-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:50:09-05:00 INF Successfully retrieved node status with insecure flag
+2025-05-22T21:50:09-05:00 INF Regenerating config prior to commands...
+2025-05-22T21:50:09-05:00 INF Nothing to decrypt
+2025-05-22T21:50:09-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:50:09-05:00 INF All files decrypted successfully
+2025-05-22T21:50:09-05:00 INF Creating TalEnv configmap reference 'clustersettings'.
+2025-05-22T21:50:09-05:00 INF Configmap reference Created.
+2025-05-22T21:50:09-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:50:09-05:00 INF Running TalSecret check-and-create...
+generated config for k8s-control-1 in clusters/main/talos/generated/main-k8s-control-1.yaml
+generated client config in clusters/main/talos/generated/talosconfig
+generated .gitignore file in clusters/main/talos/generated/.gitignore
+2025-05-22T21:50:09-05:00 INF Kustomizations processed successfully.
+2025-05-22T21:50:09-05:00 INF Bootstrap: The current directory is a valid GIT repository, creating precommit hook...
+2025-05-22T21:50:09-05:00 INF Pre-commit hook created successfully.
+2025-05-22T21:50:09-05:00 INF GenConfig: Completed Successfully!
+2025-05-22T21:50:09-05:00 INF Executing Cmds...
+2025-05-22T21:50:09-05:00 INF Executing commands on node:  192.168.1.81
+WARNING: extra kernel arguments are not supported when booting using SDBoot
+2025-05-22T21:50:24-05:00 INF Healthcheck: Waiting for Node 192.168.1.81 to reach status: , booting
+2025-05-22T21:50:24-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:50:25-05:00 ERR status: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 192.168.1.81:50000: connect: connection refused"
+ error: exit status 1
+2025-05-22T21:50:25-05:00 ERR Healthcheck failed error="status: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 192.168.1.81:50000: connect: connection refused\"\n error: exit status 1" node=192.168.1.81
+2025-05-22T21:50:34-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:50:34-05:00 INF Node status retrieved successfully status="booting\n"
+2025-05-22T21:50:34-05:00 INF Periodic health check passed node=192.168.1.81 status=booting
+2025-05-22T21:50:34-05:00 INF Bootstrap: At this point your system is installed to disk, please make sure not to reboot into the installer ISO/USB  192.168.1.81
+2025-05-22T21:50:34-05:00 INF Bootstrap: running bootstrap on node:  192.168.1.81
+2025-05-22T21:50:34-05:00 INF Bootstrap: waiting for VIP 192.168.1.123 to come online...
+2025-05-22T21:50:34-05:00 INF Healthcheck: Waiting for Node 192.168.1.123 to reach status: , running
+2025-05-22T21:50:34-05:00 INF Checking node status node=192.168.1.123
+2025-05-22T21:50:38-05:00 ERR status: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing: dial tcp 192.168.1.123:50000: connect: no route to host"
+ error: exit status 1
+2025-05-22T21:50:38-05:00 ERR Healthcheck failed error="status: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 192.168.1.123:50000: connect: no route to host\"\n error: exit status 1" node=192.168.1.123
+2025-05-22T21:50:44-05:00 INF Checking node status node=192.168.1.123
+2025-05-22T21:50:45-05:00 INF Node status retrieved successfully status="running\n"
+2025-05-22T21:50:45-05:00 INF Periodic health check passed node=192.168.1.123 status=running
+2025-05-22T21:50:45-05:00 INF Bootstrap: Configuring kubeconfig/kubectl for VIP: 192.168.1.123
+2025-05-22T21:50:45-05:00 INF Bootstrap: Waiting for system Pods to be running for: 192.168.1.123
+2025-05-22T21:50:45-05:00 INF Checking status of required pods
+2025-05-22T21:50:45-05:00 WRN Cannot recieve pods (yet), waiting before checking again
+2025-05-22T21:50:50-05:00 WRN Cannot recieve pods (yet), waiting before checking again
+2025-05-22T21:50:55-05:00 WRN Cannot recieve pods (yet), waiting before checking again
+2025-05-22T21:51:00-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:05-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:10-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:15-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:20-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:25-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:30-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:35-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:40-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:45-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:50-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:51:55-05:00 INF All required pods are running
+2025-05-22T21:51:55-05:00 INF Bootstrap: Starting Cluster configuration...
+2025-05-22T21:51:55-05:00 INF Kubernetes clientset created successfully
+2025-05-22T21:51:55-05:00 INF Waiting to approve certificates...
+2025-05-22T21:51:55-05:00 INF Bootstrap: Installing kube-prometheus-stack
+
+2025-05-22T21:51:55-05:00 INF Bootstrap: Installing cilium
+
+2025-05-22T21:51:55-05:00 INF Bootstrap: Installing kubelet-csr-approver
+
+2025-05-22T21:51:55-05:00 INF Approved CSR CSRName=csr-lbd4v
+Pulled: ghcr.io/home-operations/charts-mirror/cilium:1.17.2
+Digest: sha256:7a5c79de4872a1cc06245a4ca009894bfcfd0dbd5c74c4982d01f10f76956831
+Pulled: ghcr.io/prometheus-community/charts/kube-prometheus-stack:70.4.2
+Digest: sha256:37732ef7f269521bac245f1ee9548ea6b650e547cf77c5574982e0df27e4ec59
+2025-05-22T21:51:57-05:00 INF Release cilium is now deployed
+
+Pulled: tccr.io/truecharts/kubelet-csr-approver:1.4.2
+Digest: sha256:1409cef91856e86f99f2bfb08e1fcce748960a67a2ac29064d9f49ad0270acc4
+2025-05-22T21:52:02-05:00 INF Release kubelet-csr-approver is now deployed
+
+W0522 21:52:36.002420   18239 warnings.go:70] would violate PodSecurity "restricted:latest": host namespaces (hostNetwork=true, hostPID=true), allowPrivilegeEscalation != false (container "node-exporter" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "node-exporter" must set securityContext.capabilities.drop=["ALL"]), restricted volume types (volumes "proc", "sys", "root" use restricted volume type "hostPath"), seccompProfile (pod or container "node-exporter" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+2025-05-22T21:52:41-05:00 INF Bootstrap: Creating Namespaces...
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/apps/kubernetes-dashboard/app/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: kubernetes-dashboard of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/core/blocky/app/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: blocky of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/core/clusterissuer/app/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: clusterissuer of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/core/metallb-config/app/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:41-05:00","message":"namespace \"metallb-config\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:41-05:00 INF Successfully applied object: metallb-config of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/flux-system/flux/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:41-05:00","message":"namespace \"flux-system\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:41-05:00 INF Successfully applied object: flux-system of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/kube-system/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: kube-system of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/networking/nginx-external/app/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: nginx-external of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/networking/nginx-internal/app/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: nginx-internal of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/kube-prometheus-stack/app/namespace.yaml
+2025-05-22T21:52:41-05:00 INF Successfully applied object: kube-prometheus-stack of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/longhorn/app/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:41-05:00","message":"namespace \"longhorn-system\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:41-05:00 INF Successfully applied object: longhorn-system of kind: Namespace in namespace: 
+2025-05-22T21:52:41-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:41-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/metallb/app/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:42-05:00","message":"namespace \"metallb\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:42-05:00 INF Successfully applied object: metallb of kind: Namespace in namespace: 
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/openebs/app/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:42-05:00","message":"namespace \"openebs\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:42-05:00 INF Successfully applied object: openebs of kind: Namespace in namespace: 
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/spegel/app/namespace.yaml
+2025-05-22T21:52:42-05:00 INF Successfully applied object: spegel of kind: Namespace in namespace: 
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/system-upgrade-controller/app/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:42-05:00","message":"namespace \"system-upgrade\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:42-05:00 INF Successfully applied object: system-upgrade of kind: Namespace in namespace: 
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading namespace: clusters/main/kubernetes/system/volsync/app/namespace.yaml
+{"level":"info","v":0,"logger":"KubeAPIWarningLogger","time":"2025-05-22T21:52:42-05:00","message":"namespace \"volsync\" is exempt from Pod Security, and the policy () will be ignored"}
+2025-05-22T21:52:42-05:00 INF Successfully applied object: volsync of kind: Namespace in namespace: 
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading Manifest: clusters/main/kubernetes/flux-system/flux/sopssecret.secret.yaml
+2025-05-22T21:52:42-05:00 INF Successfully applied object: sops-age of kind: Secret in namespace: flux-system
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading Manifest: clusters/main/kubernetes/flux-system/flux/deploykey.secret.yaml
+2025-05-22T21:52:42-05:00 INF Successfully applied object: deploy-key of kind: Secret in namespace: flux-system
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Loading Manifest: clusters/main/kubernetes/flux-system/flux/clustersettings.secret.yaml
+2025-05-22T21:52:42-05:00 INF Successfully applied object: cluster-config of kind: ConfigMap in namespace: flux-system
+2025-05-22T21:52:42-05:00 INF KubectlApply operation completed
+2025-05-22T21:52:42-05:00 INF Bootstrap: Base Cluster Configuration Completed, continuing setup...
+2025-05-22T21:52:42-05:00 INF Bootstrap: Confirming cluster health...
+discovered nodes: ["192.168.1.81"]
+waiting for etcd to be healthy: ...
+waiting for etcd to be healthy: OK
+waiting for etcd members to be consistent across nodes: ...
+waiting for etcd members to be consistent across nodes: OK
+waiting for etcd members to be control plane nodes: ...
+waiting for etcd members to be control plane nodes: OK
+waiting for apid to be ready: ...
+waiting for apid to be ready: OK
+waiting for all nodes memory sizes: ...
+waiting for all nodes memory sizes: OK
+waiting for all nodes disk sizes: ...
+waiting for all nodes disk sizes: OK
+waiting for no diagnostics: ...
+waiting for no diagnostics: OK
+waiting for kubelet to be healthy: ...
+waiting for kubelet to be healthy: OK
+waiting for all nodes to finish boot sequence: ...
+waiting for all nodes to finish boot sequence: OK
+waiting for all k8s nodes to report: ...
+waiting for all k8s nodes to report: OK
+waiting for all control plane static pods to be running: ...
+waiting for all control plane static pods to be running: OK
+waiting for all control plane components to be ready: ...
+waiting for all control plane components to be ready: OK
+waiting for all k8s nodes to report ready: ...
+waiting for all k8s nodes to report ready: OK
+waiting for kube-proxy to report ready: ...
+waiting for kube-proxy to report ready: SKIP
+waiting for coredns to report ready: ...
+waiting for coredns to report ready: OK
+waiting for all k8s nodes to report schedulable: ...
+waiting for all k8s nodes to report schedulable: OK
+2025-05-22T21:52:42-05:00 INF Bootstrap: Installing spegel
+
+Pulled: tccr.io/truecharts/spegel:3.2.3
+Digest: sha256:57fece7d9aa912b6f5facda8a2f91ce737ff9494fe0da09e60137df136003925
+W0522 21:52:44.925214   18239 warnings.go:70] would violate PodSecurity "restricted:latest": hostPort (container "spegel" uses hostPort 30020), unrestricted capabilities (containers "spegel-init-configuration", "spegel" must not include "CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID" in securityContext.capabilities.add), restricted volume types (volumes "containerd-config", "containerd-content", "containerd-sock" use restricted volume type "hostPath"), runAsNonRoot != true (containers "spegel-init-configuration", "spegel" must not set securityContext.runAsNonRoot=false), runAsUser=0 (containers "spegel-init-configuration", "spegel" must not set runAsUser=0)
+2025-05-22T21:52:45-05:00 INF Release spegel is now deployed
+
+2025-05-22T21:52:45-05:00 INF Bootstrap: Installing cert-manager
+
+2025-05-22T21:52:45-05:00 INF Stopping certificate approval...
+Pulled: quay.io/jetstack/charts/cert-manager:v1.17.1
+Digest: sha256:3f492a55271318d34ce0bca8906396722f2908bd7260054306208fc4654c1daf
+2025-05-22T21:53:03-05:00 INF Bootstrap: Installing kubernetes-reflector
+
+Pulled: tccr.io/truecharts/kubernetes-reflector:6.5.1
+Digest: sha256:f00a3d379b358fc9c89d38ca24fdee05eece9fb6a24db4a7e6b03b4daad1968a
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing longhorn
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing cloudnative-pg
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing clusterissuer
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing volsync
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing snapshot-controller
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing metallb
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing node-feature-discovery
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing metrics-server
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing openebs
+
+2025-05-22T21:53:05-05:00 INF Bootstrap: Installing descheduler
+
+Pulled: ghcr.io/home-operations/charts-mirror/node-feature-discovery:0.17.2
+Digest: sha256:38155000466fcfc637f3743f12fb4a21ff03b559f972684279009c1db725276f
+Pulled: ghcr.io/home-operations/charts-mirror/metrics-server:3.12.2
+Digest: sha256:67d7a5e26714754423c942e2d5df1fcbec6fa67ea87ef30ef94efc27e608c3a1
+Pulled: ghcr.io/home-operations/charts-mirror/descheduler:0.32.2
+Digest: sha256:eedc2795de243ba4fd230caa46dcf5f085ee28d15df88af356612c43c921acd7
+Pulled: ghcr.io/home-operations/charts-mirror/metallb:0.14.9
+Digest: sha256:54a40964677a73a893c51b8e564acf93925d502a809191132334c1f113b531ed
+Pulled: ghcr.io/cloudnative-pg/charts/cloudnative-pg:0.23.2
+Digest: sha256:38d868c3e18431c84444bb4ded632f2a571cce7c5ff3161bb78f9d9f2fc212c7
+Pulled: ghcr.io/home-operations/charts-mirror/longhorn:1.8.1
+Digest: sha256:9af0783280391b4cd42ed9e518596d1bfdc9a3e4c55fbae3f60d9573ffe8829e
+Pulled: ghcr.io/home-operations/charts-mirror/openebs:4.2.0
+Digest: sha256:d5b87916bb5a7aed816bd870e10c8673d8e220556317aeeb5b79f694dff1719f
+2025-05-22T21:53:06-05:00 INF Release openebs is now deployed
+
+W0522 21:53:06.308896   18239 warnings.go:70] spec.template.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].preference.matchExpressions[0].key: node-role.kubernetes.io/master is use "node-role.kubernetes.io/control-plane" instead
+Pulled: tccr.io/truecharts/clusterissuer:9.6.2
+Digest: sha256:9a707d1af276fc5323726508039a2ea498a88bc1201409a205bc9deef9e8f379
+Pulled: tccr.io/truecharts/snapshot-controller:3.7.2
+Digest: sha256:bfd66cbcebe40b2093421105ced3db2eb48eb25e3556095a619af8600fd87600
+Pulled: tccr.io/truecharts/volsync:2.11.1
+Digest: sha256:0b082b2ef0b29a45fcf09b56ab6363834c01607b97c58f6e038aeb06cfdb8eea
+2025-05-22T21:53:07-05:00 INF Release longhorn is now deployed
+
+2025-05-22T21:53:08-05:00 INF Release snapshot-controller is now deployed
+
+2025-05-22T21:53:08-05:00 INF Release volsync is now deployed
+
+2025-05-22T21:53:08-05:00 INF Bootstrap: Waiting for MetalLB Pods to be running for: 192.168.1.123
+2025-05-22T21:53:08-05:00 INF Checking status of required pods
+2025-05-22T21:53:08-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:53:13-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:53:18-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:53:23-05:00 WRN Not all required pods are running, waiting before checking again
+2025-05-22T21:53:28-05:00 INF All required pods are running
+2025-05-22T21:53:28-05:00 INF Bootstrap: Loading VolumeSnapshotClasses
+2025-05-22T21:53:28-05:00 INF Bootstrap: Loading VolumeSnapshotClass: clusters/main/kubernetes/system/longhorn/app/volumeSnapshotClass.yaml
+2025-05-22T21:53:28-05:00 INF Successfully applied object: longhorn-snapshot-vsc of kind: VolumeSnapshotClass in namespace: 
+2025-05-22T21:53:28-05:00 INF KubectlApply operation completed
+2025-05-22T21:53:28-05:00 INF Bootstrap: Installing metallb-config
+
+Pulled: tccr.io/truecharts/metallb-config:8.5.3
+Digest: sha256:c1f90ceb93f9da7143c6ea23549a67ad14fcd48e96c65088469baf2f79e2c187
+2025-05-22T21:53:30-05:00 INF Bootstrap: Installing included applications
+2025-05-22T21:53:30-05:00 INF Bootstrap: Installing kubernetes-dashboard
+
+2025-05-22T21:53:30-05:00 INF Bootstrap: Installing blocky
+
+2025-05-22T21:53:30-05:00 INF Bootstrap: Installing nginx-external
+
+2025-05-22T21:53:30-05:00 INF Bootstrap: Installing nginx-internal
+
+Pulled: ghcr.io/home-operations/charts-mirror/ingress-nginx:4.12.1
+Digest: sha256:13512806f7281c21b71149b0d428eef74f360038f649b2feecbbdd98908f473f
+Pulled: ghcr.io/home-operations/charts-mirror/ingress-nginx:4.12.1
+Digest: sha256:13512806f7281c21b71149b0d428eef74f360038f649b2feecbbdd98908f473f
+Pulled: tccr.io/truecharts/kubernetes-dashboard:1.14.2
+Digest: sha256:6468223e0a78b371ac4aa22bae39321b22c2f3dde5a836c40776a34ee973beb7
+Pulled: tccr.io/truecharts/blocky:16.13.14
+Digest: sha256:ba50bee6309281981ed5287081bb90e3e69266ff3c3ebd54cbff723105adf445
+W0522 21:53:33.080172   18239 warnings.go:70] would violate PodSecurity "restricted:latest": unrestricted capabilities (container "blocky-k8sgateway" must not include "CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID" in securityContext.capabilities.add), runAsNonRoot != true (container "blocky-k8sgateway" must not set securityContext.runAsNonRoot=false), runAsUser=0 (container "blocky-k8sgateway" must not set runAsUser=0)
+W0522 21:53:33.091512   18239 warnings.go:70] would violate PodSecurity "restricted:latest": runAsNonRoot != true (container "blocky-redis" must not set securityContext.runAsNonRoot=false)
+2025-05-22T21:53:33-05:00 INF Release blocky is now deployed
+
+2025-05-22T21:53:35-05:00 INF Release kubernetes-dashboard is now deployed
+
+2025-05-22T21:53:41-05:00 INF Release nginx-internal is now deployed
+
+2025-05-22T21:53:41-05:00 INF Release nginx-external is now deployed
+
+2025-05-22T21:53:41-05:00 INF ------
+2025-05-22T21:53:41-05:00 INF GITHUB_Repository for Flux configured.
+Do you want to (re)bootstrap FluxCD as well? (yes/no) [y/n]: y
+2025-05-22T21:53:50-05:00 INF Bootstrap: The current directory is a valid GIT repository, continuing...
+2025-05-22T21:53:50-05:00 INF Bootstrap: Loading fluxcd onto the cluster...
+2025-05-22T21:53:56-05:00 INF Successfully applied object: flux-system of kind: Namespace in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: buckets.source.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: gitrepositories.source.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: helmcharts.source.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: helmrepositories.source.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: ocirepositories.source.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: source-controller of kind: Service in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: source-controller of kind: Deployment in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: source-controller of kind: ServiceAccount in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: kustomizations.kustomize.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: kustomize-controller of kind: Deployment in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: kustomize-controller of kind: ServiceAccount in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: alerts.notification.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: providers.notification.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: receivers.notification.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: notification-controller of kind: Service in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: webhook-receiver of kind: Service in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: notification-controller of kind: Deployment in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: notification-controller of kind: ServiceAccount in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: helmreleases.helm.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: helm-controller of kind: Deployment in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: helm-controller of kind: ServiceAccount in namespace: flux-system
+2025-05-22T21:53:56-05:00 INF Successfully applied object: imagepolicies.image.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: imagerepositories.image.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:56-05:00 INF Successfully applied object: image-reflector-controller of kind: Deployment in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF Successfully applied object: image-reflector-controller of kind: ServiceAccount in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF Successfully applied object: imageupdateautomations.image.toolkit.fluxcd.io of kind: CustomResourceDefinition in namespace: 
+2025-05-22T21:53:57-05:00 INF Successfully applied object: image-automation-controller of kind: Deployment in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF Successfully applied object: image-automation-controller of kind: ServiceAccount in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF Successfully applied object: crd-controller-flux-system of kind: ClusterRole in namespace: 
+2025-05-22T21:53:57-05:00 INF Successfully applied object: crd-controller-flux-system of kind: ClusterRoleBinding in namespace: 
+2025-05-22T21:53:57-05:00 INF Successfully applied object: cluster-reconciler-flux-system of kind: ClusterRoleBinding in namespace: 
+2025-05-22T21:53:57-05:00 INF Successfully applied object: flux-edit-flux-system of kind: ClusterRole in namespace: 
+2025-05-22T21:53:57-05:00 INF Successfully applied object: flux-view-flux-system of kind: ClusterRole in namespace: 
+2025-05-22T21:53:57-05:00 INF Successfully applied object: critical-pods-flux-system of kind: ResourceQuota in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF Successfully applied object: deploy-key of kind: Secret in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF Successfully applied object: cluster-config of kind: ConfigMap in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF KubectlApplyKustomize operation completed
+2025-05-22T21:53:57-05:00 INF Bootstrap: Loading git-repo manifests onto the cluster...
+2025-05-22T21:53:57-05:00 INF Successfully applied object: cluster of kind: GitRepository in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF KubectlApply operation completed
+2025-05-22T21:53:57-05:00 INF Bootstrap: Loading repositories flux-entry onto the cluster...
+2025-05-22T21:53:57-05:00 INF Successfully applied object: flux-entry-repos of kind: Kustomization in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF KubectlApply operation completed
+2025-05-22T21:53:57-05:00 INF Successfully applied object: flux-entry of kind: Kustomization in namespace: flux-system
+2025-05-22T21:53:57-05:00 INF KubectlApply operation completed
+2025-05-22T21:53:57-05:00 INF FluxCD Bootstrapped successfully
+2025-05-22T21:53:57-05:00 INF Bootstrap: Completed Successfully!
+Do you want to apply config to all remaining clusternodes as well? (yes/no) [y/n]: y
+2025-05-22T21:54:13-05:00 INF Regenerating config prior to commands...
+2025-05-22T21:54:13-05:00 INF Nothing to decrypt
+2025-05-22T21:54:13-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:54:13-05:00 INF All files decrypted successfully
+2025-05-22T21:54:13-05:00 INF Creating TalEnv configmap reference 'clustersettings'.
+2025-05-22T21:54:13-05:00 INF Configmap reference Created.
+2025-05-22T21:54:13-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:54:13-05:00 INF Running TalSecret check-and-create...
+generated config for k8s-control-1 in clusters/main/talos/generated/main-k8s-control-1.yaml
+generated client config in clusters/main/talos/generated/talosconfig
+generated .gitignore file in clusters/main/talos/generated/.gitignore
+2025-05-22T21:54:13-05:00 INF Kustomizations processed successfully.
+2025-05-22T21:54:13-05:00 INF Bootstrap: The current directory is a valid GIT repository, creating precommit hook...
+2025-05-22T21:54:13-05:00 INF Pre-commit hook created successfully.
+2025-05-22T21:54:13-05:00 INF GenConfig: Completed Successfully!
+2025-05-22T21:54:13-05:00 INF Pre-Run Healthchecks...
+2025-05-22T21:54:13-05:00 INF checking node availability:  192.168.1.81
+2025-05-22T21:54:13-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:54:13-05:00 ERR status:  error: fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long
+2025-05-22T21:54:13-05:00 ERR Healthcheck: check on node : failed 192.168.1.81
+2025-05-22T21:54:13-05:00 ERR failed with error:  healthcheck failed. status: ERROR error: status:  error: fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long
+2025-05-22T21:54:13-05:00 ERR Healthcheck failed error="status:  error: fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long" node=192.168.1.81
+2025-05-22T21:54:13-05:00 INF node seems not to be runnign correctly and cannot be used 192.168.1.81
+2025-05-22T21:54:13-05:00 INF node This will also make it impossible to poll total-cluster-health as well... 192.168.1.81
+Do you want to continue without this node? (yes/no) [y/n]: y
+2025-05-22T21:54:20-05:00 INF skipping cluster health check due to unhealthy nodes being ignored...
+2025-05-22T21:54:20-05:00 INF Executing Cmds...
+2025-05-22T21:54:20-05:00 INF Executing commands on node:  192.168.1.81
+2025-05-22T21:54:20-05:00 INF err:  fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long
+2025-05-22T21:54:20-05:00 INF node has thrown an error... 192.168.1.81
+Are you sure you want to continue applying this to other nodes? (yes/no) [y/n]: y
+2025-05-22T21:54:38-05:00 INF checking if node is back online:  192.168.1.81
+2025-05-22T21:54:38-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:54:38-05:00 ERR status:  error: fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long
+2025-05-22T21:54:38-05:00 ERR Healthcheck: check on node : failed 192.168.1.81
+2025-05-22T21:54:38-05:00 ERR failed with error:  healthcheck failed. status: ERROR error: status:  error: fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long
+2025-05-22T21:54:38-05:00 ERR Healthcheck failed error="status:  error: fork/exec /home/andrew/.cache/clustertool/talosctl-linux-amd64: argument list too long" node=192.168.1.81
+2025-05-22T21:54:38-05:00 INF node seems not to be running correctly... 192.168.1.81
+Are you sure you want to continue applying this to other nodes? (yes/no) [y/n]: y
+[andrew@ajewell-lf-2025]~/Documents/code/truecharts-config-2025% clustertool talos apply
+
+
+  _______               _____ _                _
+ |__   __|             / ____| |              | |
+    | |_ __ _   _  ___| |    | |__   __ _ _ __| |_ ___
+    | | '__| | | |/ _ \ |    | '_ \ / _` | '__| __/ __|
+    | | |  | |_| |  __/ |____| | | | (_| | |  | |_\__ \
+    |_|_|   \__,_|\___|\_____|_| |_|\__,_|_|   \__|___/
+          _______         __         ______          __
+         / ___/ /_ _____ / /____ ___/_  __/__  ___  / /
+        / /__/ / // (_-</ __/ -_) __// / / _ \/ _ \/ /
+        \___/_/\_,_/___/\__/\__/_/  /_/  \___/\___/_/
+
+
+---
+Clustertool Version: 2.0.0
+---
+2025-05-22T21:54:53-05:00 INF Checking if System Time is correct...
+2025-05-22T21:54:53-05:00 INF System Time is correct...
+2025-05-22T21:54:53-05:00 INF Cluster name: main
+
+2025-05-22T21:54:53-05:00 INF Nothing to decrypt
+2025-05-22T21:54:53-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:54:53-05:00 INF All files decrypted successfully
+2025-05-22T21:54:53-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:54:53-05:00 INF Checking if first node   is ready to recieve anything... 192.168.1.81
+2025-05-22T21:54:53-05:00 INF Healthcheck: Waiting for Node 192.168.1.81 to reach status: , running, maintenance
+2025-05-22T21:54:53-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:54:53-05:00 INF Node status retrieved successfully status="running\n"
+2025-05-22T21:54:53-05:00 INF Apply: running first controlnode detected, continuing...
+2025-05-22T21:54:53-05:00 INF Regenerating config prior to commands...
+2025-05-22T21:54:53-05:00 INF Nothing to decrypt
+2025-05-22T21:54:53-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:54:53-05:00 INF All files decrypted successfully
+2025-05-22T21:54:53-05:00 INF Creating TalEnv configmap reference 'clustersettings'.
+2025-05-22T21:54:53-05:00 INF Configmap reference Created.
+2025-05-22T21:54:53-05:00 INF ClusterEnv loaded successfully
+
+2025-05-22T21:54:53-05:00 INF Running TalSecret check-and-create...
+generated config for k8s-control-1 in clusters/main/talos/generated/main-k8s-control-1.yaml
+generated client config in clusters/main/talos/generated/talosconfig
+generated .gitignore file in clusters/main/talos/generated/.gitignore
+2025-05-22T21:54:53-05:00 INF Kustomizations processed successfully.
+2025-05-22T21:54:53-05:00 INF Bootstrap: The current directory is a valid GIT repository, creating precommit hook...
+2025-05-22T21:54:53-05:00 INF Pre-commit hook created successfully.
+2025-05-22T21:54:53-05:00 INF GenConfig: Completed Successfully!
+2025-05-22T21:54:53-05:00 INF Pre-Run Healthchecks...
+2025-05-22T21:54:53-05:00 INF checking node availability:  192.168.1.81
+2025-05-22T21:54:53-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:54:53-05:00 INF Node status retrieved successfully status="running\n"
+2025-05-22T21:54:53-05:00 INF Healthcheck: node currently reporting status:  192.168.1.81 running
+2025-05-22T21:54:53-05:00 INF Checking node readiness status node=192.168.1.81
+2025-05-22T21:54:53-05:00 INF Node is ready
+Do you want to check the health of the cluster? (yes/no) [y/n]: y
+2025-05-22T21:54:55-05:00 INF Checking if cluster is healthy...
+discovered nodes: ["192.168.1.81"]
+waiting for etcd to be healthy: ...
+waiting for etcd to be healthy: OK
+waiting for etcd members to be consistent across nodes: ...
+waiting for etcd members to be consistent across nodes: OK
+waiting for etcd members to be control plane nodes: ...
+waiting for etcd members to be control plane nodes: OK
+waiting for apid to be ready: ...
+waiting for apid to be ready: OK
+waiting for all nodes memory sizes: ...
+waiting for all nodes memory sizes: OK
+waiting for all nodes disk sizes: ...
+waiting for all nodes disk sizes: OK
+waiting for no diagnostics: ...
+waiting for no diagnostics: OK
+waiting for kubelet to be healthy: ...
+waiting for kubelet to be healthy: OK
+waiting for all nodes to finish boot sequence: ...
+waiting for all nodes to finish boot sequence: OK
+waiting for all k8s nodes to report: ...
+waiting for all k8s nodes to report: OK
+waiting for all control plane static pods to be running: ...
+waiting for all control plane static pods to be running: OK
+waiting for all control plane components to be ready: ...
+waiting for all control plane components to be ready: OK
+waiting for all k8s nodes to report ready: ...
+waiting for all k8s nodes to report ready: OK
+waiting for kube-proxy to report ready: ...
+waiting for kube-proxy to report ready: SKIP
+waiting for coredns to report ready: ...
+waiting for coredns to report ready: OK
+waiting for all k8s nodes to report schedulable: ...
+waiting for all k8s nodes to report schedulable: OK
+2025-05-22T21:54:56-05:00 INF Executing Cmds...
+2025-05-22T21:54:56-05:00 INF Executing commands on node:  192.168.1.81
+WARNING: extra kernel arguments are not supported when booting using SDBoot
+Applied configuration without a reboot
+2025-05-22T21:55:11-05:00 INF checking if node is back online:  192.168.1.81
+2025-05-22T21:55:11-05:00 INF Checking node status node=192.168.1.81
+2025-05-22T21:55:11-05:00 INF Node status retrieved successfully status="running\n"
+2025-05-22T21:55:11-05:00 INF Healthcheck: node currently reporting status:  192.168.1.81 running
+2025-05-22T21:55:11-05:00 INF Checking node readiness status node=192.168.1.81
+2025-05-22T21:55:11-05:00 INF Node is ready
+2025-05-22T21:55:11-05:00 INF Checking if cluster is healthy after commands...
+2025-05-22T21:55:11-05:00 INF err:  exec: no command
+[andrew@ajewell-lf-2025]~/Documents/code/truecharts-config-2025% 
+

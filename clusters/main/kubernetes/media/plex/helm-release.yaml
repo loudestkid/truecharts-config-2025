@@ -1,0 +1,109 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+    name: plex
+    namespace: media
+spec:
+    interval: 15m
+    chart:
+        spec:
+            chart: plex
+            version: 18.0.12
+            sourceRef:
+                kind: HelmRepository
+                name: truecharts
+                namespace: flux-system
+            install:
+                createNamespace: true
+                crds: CreateReplace
+                remediation:
+                    retries: 3
+    releaseName: plex
+    values:
+        TZ: America/Chicago
+        addons:
+            codeserver:
+                enabled: false
+            netshoot:
+                enabled: false
+            vpn:
+                type: disabled
+        credentials:
+            cloudflare:
+                accessKey: ${VOLSYNC_ACCESS_KEY}
+                bucket: ${VOLSYNC_BUCKET_NAME}
+                encrKey: ${PLEX_CONFIG_ENCRYPTION_KEY}
+                name: cloudflare
+                path: ""
+                secretKey: ${VOLSYNC_SECRET_KEY}
+                type: s3
+                url: ${VOLSYNC_S3_URL}
+        ingress:
+            main:
+                enabled: false
+        persistence:
+            config:
+                enabled: true
+                mountPath: /config
+                readOnly: false
+                storageClass: ""
+                volsync:
+                    - credentials: cloudflare
+                      dest:
+                        enabled: true
+                      name: plex-config
+                      src:
+                        enabled: false
+                      type: restic
+            transcode:
+                enabled: true
+                medium: Memory
+                mountPath: /transcode
+                targetSelectAll: true
+                type: emptyDir
+        plex:
+            additionalAdvertiseURL: ""
+            disableGDM: true
+            requireHTTPS: false
+            serverIP: ${PLEX_IP}
+        release_name: plex
+        resources: {}
+        securityContext:
+            container:
+                UMASK: "0022"
+                runAsGroup: 568
+                runAsUser: 568
+            pod:
+                fsGroupChangePolicy: OnRootMismatch
+        service:
+            main:
+                enabled: true
+                loadBalancerIP: ${PLEX_IP}
+                ports:
+                    main:
+                        port: 32400
+                        protocol: http
+                        targetPort: 32400
+                type: LoadBalancer
+        workload:
+            main:
+                podSpec:
+                    containers:
+                        main:
+                            env:
+                                ALLOWED_NETWORKS: 172.16.0.0/12,10.0.0.0/8,192.168.1.0/24
+                                PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
+                                PLEX_PREFERENCE_GDM: GdmEnabled={{ ternary "0" "1" .Values.plex.disableGDM }}
+                                PLEX_PREFERENCE_SEC_CON: secureConnections={{ ternary "0" "1" .Values.plex.requireHTTPS }}
+                            probes:
+                                liveness:
+                                    enabled: true
+                                    path: /identity
+                                readiness:
+                                    enabled: true
+                                    path: /identity
+                                startup:
+                                    enabled: true
+                                    path: /identity
+                replicas: 1
+                type: Deployment
