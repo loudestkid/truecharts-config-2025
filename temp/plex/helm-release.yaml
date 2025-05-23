@@ -15,14 +15,6 @@ spec:
                 namespace: flux-system
     releaseName: plex
     values:
-        TZ: America/Chicago
-        addons:
-            codeserver:
-                enabled: false
-            netshoot:
-                enabled: false
-            vpn:
-                type: disabled
         credentials:
             cloudflare:
                 accessKey: ${VOLSYNC_ACCESS_KEY}
@@ -40,8 +32,6 @@ spec:
             config:
                 enabled: true
                 mountPath: /config
-                readOnly: false
-                storageClass: ""
                 volsync:
                     - credentials: cloudflare
                       dest:
@@ -68,14 +58,6 @@ spec:
             requireHTTPS: false
             serverIP: ${PLEX_IP}
         release_name: plex
-        resources: {}
-        securityContext:
-            container:
-                UMASK: "0022"
-                runAsGroup: 568
-                runAsUser: 568
-            pod:
-                fsGroupChangePolicy: OnRootMismatch
         service:
             main:
                 enabled: true
@@ -94,17 +76,3 @@ spec:
                             env:
                                 ALLOWED_NETWORKS: 172.16.0.0/12,10.0.0.0/8,192.168.1.0/24
                                 PLEX_CLAIM: ${PLEX_CLAIM_TOKEN}
-                                PLEX_PREFERENCE_GDM: GdmEnabled={{ ternary "0" "1" .Values.plex.disableGDM }}
-                                PLEX_PREFERENCE_SEC_CON: secureConnections={{ ternary "0" "1" .Values.plex.requireHTTPS }}
-                            probes:
-                                liveness:
-                                    enabled: true
-                                    path: /identity
-                                readiness:
-                                    enabled: true
-                                    path: /identity
-                                startup:
-                                    enabled: true
-                                    path: /identity
-                replicas: 1
-                type: Deployment
