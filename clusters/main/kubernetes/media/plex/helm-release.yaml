@@ -56,6 +56,12 @@ spec:
                 mountPath: /transcode
                 targetSelectAll: true
                 type: emptyDir
+            media:
+                enabled: true
+                type: nfs
+                path: ${MEDIA_PATH}
+                mountPath: /media
+                server: ${TRUENAS_IP}
         plex:
             additionalAdvertiseURL: ""
             disableGDM: true
