@@ -58,9 +58,9 @@ spec:
                 type: emptyDir
             media:
                 enabled: true
+                mountPath: /media
                 type: nfs
                 path: ${MEDIA_PATH}
-                mountPath: /media
                 server: ${TRUENAS_IP}
         plex:
             additionalAdvertiseURL: ""
