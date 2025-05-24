@@ -32,6 +32,7 @@ spec:
             config:
                 enabled: true
                 mountPath: /config
+                size: 256Gi
                 volsync:
                     - credentials: cloudflare
                       dest:
