@@ -1,0 +1,7 @@
+[*]
+indent_style = space
+
+[helm-release.yaml]
+indent_size = 4
+indent_style = space
+
