@@ -82,6 +82,12 @@ spec:
                       src:
                         enabled: false
                       type: restic
+            media:
+                enabled: true
+                mountPath: /media
+                type: nfs
+                path: ${MEDIA_PATH}
+                server: ${TRUENAS_IP}
         qbitportforward:
             QBT_PASSWORD: ${QBT_PASSWORD}
             QBT_USERNAME: ${QBT_USERNAME}
