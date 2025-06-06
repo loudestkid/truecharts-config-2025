@@ -8,7 +8,7 @@ spec:
     chart:
         spec:
             chart: qbittorrent
-            version: 20.0.11
+            version: 22.5.3
             sourceRef:
                 kind: HelmRepository
                 name: truecharts
@@ -77,10 +77,10 @@ spec:
                 volsync:
                     - credentials: cloudflare
                       dest:
-                        enabled: true
-                      name: qbt-config
-                      src:
                         enabled: false
+                      name: qbt-config-2025
+                      src:
+                        enabled: true
                       type: restic
             media:
                 enabled: true
@@ -92,10 +92,6 @@ spec:
             QBT_PASSWORD: ${QBT_PASSWORD}
             QBT_USERNAME: ${QBT_USERNAME}
             enabled: true
-        qbitportforwardImage:
-            pullPolicy: IfNotPresent
-            repository: mjmeli/qbittorrent-port-forward-gluetun-server
-            tag: latest@sha256:4c8290fe6a73ce7a38de3bfdacc681f5e44f33ccacf74b762a7ac2a9f942a456
         release_name: qbittorrent-main
         resources: {}
         securityContext:
@@ -150,21 +146,11 @@ spec:
                     containers:
                         qbitportforward:
                             command: /usr/src/app/main.sh
-                            enabled: true
                             env:
                                 GTN_ADDR: '{{ printf "http://%v-gluetun:8000" (include "tc.v1.common.lib.chart.names.fullname" $) }}'
                                 QBT_ADDR: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'
                                 QBT_PASSWORD: '{{ .Values.qbitportforward.QBT_PASSWORD }}'
                                 QBT_USERNAME: '{{ .Values.qbitportforward.QBT_USERNAME }}'
-                            imageSelector: qbitportforwardImage
-                            primary: true
-                            probes:
-                                liveness:
-                                    enabled: false
-                                readiness:
-                                    enabled: false
-                                startup:
-                                    enabled: false
                     restartPolicy: OnFailure
                 schedule: '*/5 * * * *'
                 type: CronJob
