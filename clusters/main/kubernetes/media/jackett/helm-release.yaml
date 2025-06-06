@@ -38,10 +38,10 @@ spec:
                 volsync:
                     - credentials: cloudflare
                       dest:
-                        enabled: true
-                      name: jackett-config
-                      src:
                         enabled: false
+                      name: jackett-config-2025
+                      src:
+                        enabled: true
                       type: restic
         release_name: jackett
         resources: {}
