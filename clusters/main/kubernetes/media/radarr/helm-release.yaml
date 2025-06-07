@@ -86,11 +86,17 @@ spec:
                 volsync:
                     - credentials: cloudflare
                       dest:
-                        enabled: true
-                      name: radarr-config
-                      src:
                         enabled: false
+                      name: radarr-config-2025
+                      src:
+                        enabled: true
                       type: restic
+            media:
+                enabled: true
+                mountPath: /media
+                type: nfs
+                path: ${MEDIA_PATH}
+                server: ${TRUENAS_IP}
         release_name: radarr
         resources: {}
         securityContext:
