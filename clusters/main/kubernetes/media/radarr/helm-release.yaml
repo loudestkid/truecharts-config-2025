@@ -86,10 +86,10 @@ spec:
                 volsync:
                     - credentials: cloudflare
                       dest:
-                        enabled: false
-                      name: radarr-config-2025
-                      src:
                         enabled: true
+                      name: radarr-config
+                      src:
+                        enabled: false
                       type: restic
             media:
                 enabled: true
