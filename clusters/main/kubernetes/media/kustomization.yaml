@@ -6,4 +6,4 @@ resources:
   - qbt
   - jackett
   - sonarr
-#  - radarr
+  - radarr
