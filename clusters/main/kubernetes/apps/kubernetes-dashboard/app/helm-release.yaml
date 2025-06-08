@@ -49,4 +49,4 @@ spec:
           - host: ${DASHBOARD_DNS_PREFIX}${DOMAIN_0}
             paths:
               - path: /
-                pathType: prefix
+                pathType: Prefix
