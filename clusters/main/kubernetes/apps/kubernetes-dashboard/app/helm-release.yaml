@@ -37,3 +37,16 @@ spec:
         ports:
           main:
             port: 80
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: external
+        integrations:
+          certManager:
+            enabled: true
+            certificateIssuer: domain-0-le-prod
+        hosts:
+          - host: ${DASHBOARD_DNS_PREFIX}${DOMAIN_0}
+            paths:
+              - path: /
+                pathType: prefix
