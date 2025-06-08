@@ -1,0 +1,140 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+    name: lldap
+    namespace: lldap
+spec:
+    interval: 15m
+    chart:
+        spec:
+            chart: lldap
+            version: 6.0.9
+            sourceRef:
+                kind: HelmRepository
+                name: truecharts
+                namespace: flux-system
+    releaseName: lldap
+    values:
+        TZ: America/Chicago
+        cnpg:
+            main:
+                backups:
+                    credentials: cloudflare
+                    enabled: true
+                    retentionPolicy: ""
+                    revision: "2"
+                cluster:
+                    instances: 1
+                    singleNode: true
+                database: lldap
+                enabled: true
+                hibernate: false
+                mode: recovery
+                monitoring:
+                    disableDefaultQueries: false
+                    enablePodMonitor: true
+                password: ${LLDAP_CNPG_PASSWORD}
+                pgVersion: 16
+                pooler:
+                    enabled: false
+                recovery:
+                    credentials: cloudflare
+                    enabled: true
+                    revision: ""
+                    serverName: ""
+                user: lldap
+        credentials:
+            cloudflare:
+                accessKey: ${VOLSYNC_ACCESS_KEY}
+                bucket: ${VOLSYNC_BUCKET_NAME}
+                encrKey: ${LLDAP_CONFIG_ENCRYPTION_KEY}
+                name: cloudflare
+                path: ""
+                secretKey: ${VOLSYNC_SECRET_KEY}
+                type: s3
+                url: ${VOLSYNC_S3_URL}
+        ingress:
+            main:
+                enabled: true
+                hosts:
+                    - host: ${LLDAP_DNS_PREFIX}${DOMAIN_0}
+                      paths:
+                        - path: /
+                          pathType: Prefix
+                ingressClassName: external
+                integrations:
+                    certManager:
+                        certificateIssuer: domain-0-le-prod
+                        enabled: true
+                    traefik:
+                        enabled: false
+        persistence:
+            data:
+                enabled: true
+                mountPath: /data
+                readOnly: false
+                storageClass: ""
+                volsync:
+                    - credentials: cloudflare
+                      dest:
+                        enabled: true
+                      name: lldap-config
+                      src:
+                        enabled: false
+                      type: restic
+        release_name: lldap
+        resources: {}
+        securityContext:
+            container:
+                UMASK: "0022"
+                readOnlyRootFilesystem: false
+        service:
+            ldap:
+                enabled: true
+                loadBalancerIP: ${LLDAP_IP}
+                ports:
+                    ldap:
+                        enabled: true
+                        port: 3890
+                type: LoadBalancer
+            main:
+                enabled: true
+                loadBalancerIP: ${LLDAP_IP}
+                ports:
+                    main:
+                        port: 17170
+                type: LoadBalancer
+        workload:
+            main:
+                podSpec:
+                    containers:
+                        main:
+                            env:
+                                LLDAP_HTTP_PORT: '{{ .Values.service.main.ports.main.port }}'
+                                LLDAP_HTTP_URL: ${LLDAP_HTTP_URL}
+                                LLDAP_JWT_SECRET:
+                                    - secretRef:
+                                        key: LLDAP_JWT_SECRET
+                                        name: secrets
+                                LLDAP_LDAP_BASE_DN: ${LLDAP_BASE_DN}
+                                LLDAP_LDAP_PORT: '{{ .Values.service.ldap.ports.ldap.port }}'
+                                LLDAP_LDAP_USER_DN: ${LLDAP_USER_DN}
+                                LLDAP_LDAP_USER_EMAIL: ${LLDAP_USER_EMAIL}
+                                LLDAP_LDAP_USER_PASS: ${LLDAP_USER_PASSWORD}
+                                LLDAP_SMTP_OPTIONS__ENABLE_PASSWORD_RESET: true
+                                LLDAP_SMTP_OPTIONS__FROM: ${LLDAP_SMTP_EMAIL_DETAILS}
+                                LLDAP_SMTP_OPTIONS__PASSWORD: ${LLDAP_SMTP_PASSWORD}
+                                LLDAP_SMTP_OPTIONS__PORT: 587
+                                LLDAP_SMTP_OPTIONS__REPLY_TO: ${LLDAP_SMTP_EMAIL_DETAILS}
+                                LLDAP_SMTP_OPTIONS__SERVER: ${LLDAP_SMTP_SERVER_URL}
+                                LLDAP_SMTP_OPTIONS__SMTP_ENCRYPTION: ${LLDAP_SMTP_ENCRYPTION}
+                                LLDAP_SMTP_OPTIONS__USER: ${LLDAP_SMTP_USERNAME}
+                                LLDAP_VERBOSE: false
+                                LLDAP_database_url:
+                                    secretKeyRef:
+                                        key: std
+                                        name: cnpg-main-urls
+                                LLDAP_key_file: ${LLDAP_KEY_FILE}
+                                smtp: true
+                replicas: 1
+                type: Deployment
