@@ -104,7 +104,7 @@ spec:
           additional_groups_dn: ${LLDAP_GROUPS_DN}
           groups_filter: ${LLDAP_GROUPS_FILTER}
           user: ${AUTHELIA_LDAP_USER_VALUE}
-          password: ${LLDAP_PASSWORD}
+          password: ${LLDAP_USER_PASSWORD}
       access_control:
         default_policy: deny
         rules:
