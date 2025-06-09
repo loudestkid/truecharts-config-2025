@@ -128,8 +128,7 @@ spec:
           address: smtp://${LLDAP_SMTP_SERVER_URL}:587
           username: ${LLDAP_SMTP_USERNAME}
           password: ${LLDAP_SMTP_PASSWORD}
-          sender: auth@${DOMAIN_0}
-          startup_check_address: auth@${DOMAIN_0}
-          disable_html_emails: true
+          sender: ${LLDAP_USER_EMAIL}
+          startup_check_address: ${LLDAP_USER_EMAIL}
           tls:
             server_name: ${SMTP_HOST}
