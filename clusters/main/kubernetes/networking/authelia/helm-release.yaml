@@ -53,7 +53,7 @@ spec:
       main:
         annotations:
           cnpg.io/skipEmptyWalArchiveCheck: "enabled"
-        mode: recovery
+        mode: standalone
         cluster:
           singleNode: true
         backups:
