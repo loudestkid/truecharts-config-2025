@@ -28,7 +28,24 @@ spec:
                 url: ${VOLSYNC_S3_URL}
         ingress:
             main:
-                enabled: false
+                enabled: true
+                hosts:
+                    - host: ${JACKETT_DNS_PREFIX}${DOMAIN_0}
+                      paths:
+                        - path: /
+                          pathType: Prefix
+                ingressClassName: external
+                annotations:
+                    nginx.ingress.kubernetes.io/auth-method: 'GET'
+                    nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
+                    nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
+                    nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
+                integrations:
+                    certManager:
+                        certificateIssuer: domain-0-le-prod
+                        enabled: true
+                    traefik:
+                        enabled: false
         persistence:
             config:
                 enabled: true

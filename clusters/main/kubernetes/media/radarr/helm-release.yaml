@@ -39,27 +39,24 @@ spec:
             tag: v2.2.0@sha256:320b0ea7399f4b9af4741dcdddd7d40c05c36b0359679305d8a54df4e97065df
         ingress:
             main:
-                enabled: false
-                # hosts:
-                #     - host: radarr.jewell.one
-                #       paths:
-                #         - path: /
-                #           pathType: Prefix
-                # ingressClassName: ""
-                # integrations:
-                #     certManager:
-                #         certificateIssuer: cert
-                #         enabled: true
-                #     homepage:
-                #         enabled: false
-                #     traefik:
-                #         allowCors: false
-                #         enabled: true
-                #         entrypoints:
-                #             - websecure
-                #         middlewares:
-                #             - name: auth
-                #               namespace: ""
+                enabled: true
+                hosts:
+                    - host: ${RADARR_DNS_PREFIX}${DOMAIN_0}
+                      paths:
+                        - path: /
+                          pathType: Prefix
+                ingressClassName: external
+                annotations:
+                    nginx.ingress.kubernetes.io/auth-method: 'GET'
+                    nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
+                    nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
+                    nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
+                integrations:
+                    certManager:
+                        certificateIssuer: domain-0-le-prod
+                        enabled: true
+                    traefik:
+                        enabled: false
         metrics:
             main:
                 enabled: false
