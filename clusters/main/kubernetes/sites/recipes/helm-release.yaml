@@ -1,7 +1,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: testsite
+  name: recipes
   namespace: sites
 spec:
   interval: 15m
@@ -20,12 +20,6 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    persistence:
-      config:
-        enabled: true
-        mountPath: "/config"
-      varrun:
-        enabled: true
     ingress:
         main:
           enabled: true
@@ -37,7 +31,7 @@ spec:
               enabled: true
               certificateIssuer: domain-0-le-prod
           hosts:
-            - host: ${TESTSITE_DNS_PREFIX}${DOMAIN_0}
+            - host: ${RECIPES_DNS_PREFIX}${DOMAIN_0}
               paths:
                 - path: /
                   pathType: Prefix
