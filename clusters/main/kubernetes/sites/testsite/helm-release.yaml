@@ -20,6 +20,10 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    securityContext:
+      container:
+        runAsUser: 568
+        runAsGroup: 568
     persistence:
       config:
         enabled: true
