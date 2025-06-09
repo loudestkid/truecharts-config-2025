@@ -20,19 +20,12 @@ spec:
   uninstall:
     keepHistory: false
   values:
-    securityContext:
-      container:
-        runAsUser: 568
-        runAsGroup: 568
     persistence:
       config:
         enabled: true
         mountPath: "/config"
       varrun:
         enabled: true
-        type: nfs
-        path: ${TESTSITE_PATH}
-        server: ${TRUENAS_IP}
     ingress:
         main:
           enabled: true

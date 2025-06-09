@@ -150,7 +150,7 @@ spec:
                     containers:
                         main:
                             env:
-                                SONARR__AUTHENTICATION_METHOD: ""
+                                SONARR__AUTHENTICATION_METHOD: "External"
                                 SONARR__PORT: '{{ .Values.service.main.ports.main.port }}'
                             probes:
                                 liveness:
