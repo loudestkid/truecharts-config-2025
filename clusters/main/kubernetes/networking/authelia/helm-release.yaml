@@ -62,6 +62,7 @@ spec:
           revision: "3"
         recovery:
           enabled: false
+          credentials: cloudflare
     persistence:
       config:
         volsync:
