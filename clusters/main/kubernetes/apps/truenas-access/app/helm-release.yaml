@@ -39,10 +39,10 @@ spec:
           nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
           nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
         hosts:
-        - host: ${TRUENAS_DNS_PREFIX}${DOMAIN_0}
-          paths:
-          - path: /
-            pathType: Prefix
+          - host: ${TRUENAS_DNS_PREFIX}${DOMAIN_0}
+            paths:
+            - path: /
+              pathType: Prefix
         integrations:
           certManager:
             certificateIssuer: domain-0-le-prod
