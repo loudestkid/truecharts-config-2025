@@ -47,11 +47,11 @@ spec:
           certManager:
             enabled: true
             certificateIssuer: domain-0-le-prod
-        annotations:
-          nginx.ingress.kubernetes.io/auth-method: 'GET'
-          nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
-          nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
-          nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
+        # annotations:
+        #   nginx.ingress.kubernetes.io/auth-method: 'GET'
+        #   nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
+        #   nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
+        #   nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
         hosts:
           - host: ${DASHBOARD_DNS_PREFIX}${DOMAIN_0}
             paths:
