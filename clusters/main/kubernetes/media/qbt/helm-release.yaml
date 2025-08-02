@@ -20,9 +20,9 @@ spec:
             gluetun:
                 enabled: true
                 container:
-                    resources:
-                        limits:
-                            truecharts.org/tun: 1
+                    #resources:
+                    #    limits:
+                    #        truecharts.org/tun: 1
                     env:
                         VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
                         VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
@@ -114,6 +114,9 @@ spec:
                     main:
                         port: 10095
                 type: LoadBalancer
+                integrations:
+                    metallb:
+                        enabled: true
             torrent:
                 enabled: true
                 loadBalancerIP: ${QBT_IP}
