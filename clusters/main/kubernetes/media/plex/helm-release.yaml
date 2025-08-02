@@ -54,7 +54,7 @@ spec:
                 path: ${MEDIA_PATH}
                 server: ${TRUENAS_IP}
         plex:
-            additionalAdvertiseURL: ""
+            additionalAdvertiseURL: "http://192.168.1.160:32400,https://192.168.1.160:32400"
             disableGDM: true
             requireHTTPS: false
             serverIP: ${PLEX_IP}
@@ -69,6 +69,9 @@ spec:
                         protocol: http
                         targetPort: 32400
                 type: LoadBalancer
+                integrations:
+                    metallb:
+                        enabled: true
         workload:
             main:
                 podSpec:

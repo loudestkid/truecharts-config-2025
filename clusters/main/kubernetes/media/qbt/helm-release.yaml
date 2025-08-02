@@ -17,24 +17,25 @@ spec:
     values:
         TZ: America/Chicago
         addons:
-            vpn:
-                configFile: ""
-                env:
-                    VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
-                    VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
-                    VPN_PORT_FORWARDING: "on"
-                    VPN_PORT_FORWARDING_PROVIDER: protonvpn
-                    VPN_SERVICE_PROVIDER: custom
-                    VPN_TYPE: wireguard
-                    WIREGUARD_ADDRESSES: ${VPN_WIREGUARD_ADDRESSES}
-                    WIREGUARD_PRIVATE_KEY: ${VPN_WIREGUARD_PRIVATE_KEY}
-                    WIREGUARD_PUBLIC_KEY: ${VPN_WIREGUARD_PUBLIC_KEY}
-                    FIREWALL_INPUT_PORTS: 10095,8000
-                excludedNetworks_IPv4:
-                    - ${QBT_EXCLUDED_NETWORKS_01}
-                    - ${QBT_EXCLUDED_NETWORKS_02}
-                killSwitch: true
-                type: gluetun
+            gluetun:
+                enabled: true
+                container:
+                    resources:
+                        limits:
+                            truecharts.org/tun: 1
+                    env:
+                        VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
+                        VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
+                        VPN_PORT_FORWARDING: "on"
+                        VPN_PORT_FORWARDING_PROVIDER: protonvpn
+                        VPN_SERVICE_PROVIDER: custom
+                        VPN_TYPE: wireguard
+                        WIREGUARD_ADDRESSES: ${VPN_WIREGUARD_ADDRESSES}
+                        WIREGUARD_PRIVATE_KEY: ${VPN_WIREGUARD_PRIVATE_KEY}
+                        WIREGUARD_PUBLIC_KEY: ${VPN_WIREGUARD_PUBLIC_KEY}
+                        FIREWALL_INPUT_PORTS: 10095,8000
+                        FIREWALL: "on"
+                        FIREWALL_OUTBOUND_SUBNETS: "${QBT_EXCLUDED_NETWORKS_01},${QBT_EXCLUDED_NETWORKS_02}"
         credentials:
             cloudflare:
                 accessKey: ${VOLSYNC_ACCESS_KEY}
