@@ -63,12 +63,13 @@ spec:
             main:
                 enabled: true
                 loadBalancerIP: ${PLEX_IP}
+                type: LoadBalancer
+                externalTrafficPolicy: Local
                 ports:
                     main:
                         port: 32400
                         protocol: http
                         targetPort: 32400
-                type: LoadBalancer
                 integrations:
                     metallb:
                         enabled: true
