@@ -1,158 +1,158 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-    name: qbittorrent-main
-    namespace: qbittorrent-main
+  name: qbittorrent-main
+  namespace: qbittorrent-main
 spec:
-    interval: 15m
-    chart:
-        spec:
-            chart: qbittorrent
-            version: 23.2.0
-            sourceRef:
-                kind: HelmRepository
-                name: truecharts
-                namespace: flux-system
-    releaseName: qbittorrent-main
-    values:
-        TZ: America/Chicago
-        addons:
-            gluetun:
-                enabled: true
-                container:
-                    #resources:
-                    #    limits:
-                    #        truecharts.org/tun: 1
-                    env:
-                        VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
-                        VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
-                        VPN_PORT_FORWARDING: "on"
-                        VPN_PORT_FORWARDING_PROVIDER: protonvpn
-                        VPN_SERVICE_PROVIDER: custom
-                        VPN_TYPE: wireguard
-                        WIREGUARD_ADDRESSES: ${VPN_WIREGUARD_ADDRESSES}
-                        WIREGUARD_PRIVATE_KEY: ${VPN_WIREGUARD_PRIVATE_KEY}
-                        WIREGUARD_PUBLIC_KEY: ${VPN_WIREGUARD_PUBLIC_KEY}
-                        FIREWALL_INPUT_PORTS: 10095,8000
-                        FIREWALL: "on"
-                        FIREWALL_OUTBOUND_SUBNETS: "${QBT_EXCLUDED_NETWORKS_01},${QBT_EXCLUDED_NETWORKS_02}"
-        credentials:
-            cloudflare:
-                accessKey: ${VOLSYNC_ACCESS_KEY}
-                bucket: ${VOLSYNC_BUCKET_NAME}
-                encrKey: ${QBT_CONFIG_ENCRYPTION_KEY}
-                name: cloudflare
-                path: ""
-                secretKey: ${VOLSYNC_SECRET_KEY}
-                type: s3
-                url: ${VOLSYNC_S3_URL}
-        ingress:
-            main:
-                enabled: true
-                hosts:
-                    - host: ${QBT_DNS_PREFIX}${DOMAIN_0}
-                      paths:
-                        - path: /
-                          pathType: Prefix
-                ingressClassName: external
-                annotations:
-                    nginx.ingress.kubernetes.io/auth-method: 'GET'
-                    nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
-                    nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
-                    nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
-                integrations:
-                    certManager:
-                        certificateIssuer: domain-0-le-prod
-                        enabled: true
-                    traefik:
-                        enabled: false
-        persistence:
-            config:
-                enabled: true
-                mountPath: /config
-                readOnly: false
-                size: 128Gi
-                storageClass: ""
-                volsync:
-                    - credentials: cloudflare
-                      dest:
-                        enabled: false
-                      name: qbt-config-2025
-                      src:
-                        enabled: true
-                      type: restic
-            media:
-                enabled: true
-                mountPath: /media
-                type: nfs
-                path: ${MEDIA_PATH}
-                server: ${TRUENAS_IP}
-        qbitportforward:
-            QBT_PASSWORD: ${QBT_PASSWORD}
-            QBT_USERNAME: ${QBT_USERNAME}
+  interval: 15m
+  chart:
+    spec:
+      chart: qbittorrent
+      version: 23.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: truecharts
+        namespace: flux-system
+  releaseName: qbittorrent-main
+  values:
+    TZ: America/Chicago
+    addons:
+      gluetun:
+        enabled: true
+        container:
+          resources:
+            limits:
+              truecharts.org/tun: 1
+          env:
+            VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
+            VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
+            VPN_PORT_FORWARDING: "on"
+            VPN_PORT_FORWARDING_PROVIDER: protonvpn
+            VPN_SERVICE_PROVIDER: custom
+            VPN_TYPE: wireguard
+            WIREGUARD_ADDRESSES: ${VPN_WIREGUARD_ADDRESSES}
+            WIREGUARD_PRIVATE_KEY: ${VPN_WIREGUARD_PRIVATE_KEY}
+            WIREGUARD_PUBLIC_KEY: ${VPN_WIREGUARD_PUBLIC_KEY}
+            FIREWALL_INPUT_PORTS: 10095,8000
+            FIREWALL: "on"
+            FIREWALL_OUTBOUND_SUBNETS: "${QBT_EXCLUDED_NETWORKS_01},${QBT_EXCLUDED_NETWORKS_02}"
+    credentials:
+      cloudflare:
+        accessKey: ${VOLSYNC_ACCESS_KEY}
+        bucket: ${VOLSYNC_BUCKET_NAME}
+        encrKey: ${QBT_CONFIG_ENCRYPTION_KEY}
+        name: cloudflare
+        path: ""
+        secretKey: ${VOLSYNC_SECRET_KEY}
+        type: s3
+        url: ${VOLSYNC_S3_URL}
+    ingress:
+      main:
+        enabled: true
+        hosts:
+          - host: ${QBT_DNS_PREFIX}${DOMAIN_0}
+            paths:
+              - path: /
+                pathType: Prefix
+        ingressClassName: external
+        integrations:
+          nginx:
             enabled: true
-        release_name: qbittorrent-main
-        resources: {}
-        securityContext:
-            container:
-                UMASK: "0022"
-                readOnlyRootFilesystem: false
-        service:
-            gluetun:
-                enabled: true
-                ports:
-                    gluetun:
-                        enabled: true
-                        port: 8000
-                        protocol: http
-                        targetPort: 8000
-                type: ClusterIP
+            auth:
+              type: authelia
+              internalHost: authelia.authelia.svc.cluster.local:9091
+              externalHost: ${AUTHELIA_DNS_PREFIX}${DOMAIN_0}
+          certManager:
+            certificateIssuer: domain-0-le-prod
+            enabled: true
+    persistence:
+      config:
+        enabled: true
+        mountPath: /config
+        readOnly: false
+        size: 128Gi
+        storageClass: ""
+        volsync:
+          - credentials: cloudflare
+            dest:
+              enabled: false
+            name: qbt-config-2025
+            src:
+              enabled: true
+            type: restic
+      media:
+        enabled: true
+        mountPath: /media
+        type: nfs
+        path: ${MEDIA_PATH}
+        server: ${TRUENAS_IP}
+    qbitportforward:
+      QBT_PASSWORD: ${QBT_PASSWORD}
+      QBT_USERNAME: ${QBT_USERNAME}
+      enabled: true
+    release_name: qbittorrent-main
+    resources: {}
+    securityContext:
+      container:
+        UMASK: "0022"
+        readOnlyRootFilesystem: false
+    service:
+      gluetun:
+        enabled: true
+        ports:
+          gluetun:
+            enabled: true
+            port: 8000
+            protocol: http
+            targetPort: 8000
+        type: ClusterIP
+      main:
+        enabled: true
+        loadBalancerIP: ${QBT_IP}
+        ports:
+          main:
+            port: 10095
+        type: LoadBalancer
+        integrations:
+          metallb:
+            enabled: true
+      torrent:
+        enabled: true
+        # loadBalancerIP: ${QBT_IP}
+        ports:
+          torrent:
+            enabled: true
+            port: 51820
+            protocol: tcp
+          torrentudp:
+            enabled: true
+            port: "{{ .Values.service.torrent.ports.torrent.port }}"
+            protocol: udp
+        type: ClusterIP
+        # type: LoadBalancer
+    workload:
+      main:
+        podSpec:
+          containers:
             main:
-                enabled: true
-                loadBalancerIP: ${QBT_IP}
-                ports:
-                    main:
-                        port: 10095
-                type: LoadBalancer
-                integrations:
-                    metallb:
-                        enabled: true
-            torrent:
-                enabled: true
-                loadBalancerIP: ${QBT_IP}
-                ports:
-                    torrent:
-                        enabled: true
-                        port: 51820
-                        protocol: tcp
-                    torrentudp:
-                        enabled: true
-                        port: '{{ .Values.service.torrent.ports.torrent.port }}'
-                        protocol: udp
-                type: LoadBalancer
-        workload:
-            main:
-                podSpec:
-                    containers:
-                        main:
-                            env:
-                                QBITTORRENT__PORT: '{{ .Values.service.main.ports.main.port }}'
-                                QBT_BitTorrent__Session__Port: '{{ .Values.service.torrent.ports.torrent.port }}'
-                                QBT_Preferences__Connection__PortRangeMin: '{{ .Values.service.torrent.ports.torrent.port }}'
-                                QBT_Preferences__WebUI__Address: '*'
-                replicas: 1
-                type: Deployment
+              env:
+                QBITTORRENT__PORT: "{{ .Values.service.main.ports.main.port }}"
+                QBT_BitTorrent__Session__Port: "{{ .Values.service.torrent.ports.torrent.port }}"
+                QBT_Preferences__Connection__PortRangeMin: "{{ .Values.service.torrent.ports.torrent.port }}"
+                QBT_Preferences__WebUI__Address: "*"
+        replicas: 1
+        type: Deployment
+      qbitportforward:
+        enabled: true
+        podSpec:
+          containers:
             qbitportforward:
-                enabled: true
-                podSpec:
-                    containers:
-                        qbitportforward:
-                            command: /usr/src/app/main.sh
-                            env:
-                                GTN_ADDR: '{{ printf "http://%v-gluetun:8000" (include "tc.v1.common.lib.chart.names.fullname" $) }}'
-                                QBT_ADDR: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'
-                                QBT_PASSWORD: '{{ .Values.qbitportforward.QBT_PASSWORD }}'
-                                QBT_USERNAME: '{{ .Values.qbitportforward.QBT_USERNAME }}'
-                    restartPolicy: OnFailure
-                schedule: '*/5 * * * *'
-                type: CronJob
+              command: /usr/src/app/main.sh
+              env:
+                GTN_ADDR: '{{ printf "http://%v-gluetun:8000" (include "tc.v1.common.lib.chart.names.fullname" $) }}'
+                QBT_ADDR: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'
+                QBT_PASSWORD: "{{ .Values.qbitportforward.QBT_PASSWORD }}"
+                QBT_USERNAME: "{{ .Values.qbitportforward.QBT_USERNAME }}"
+          restartPolicy: OnFailure
+        schedule: "*/5 * * * *"
+        type: CronJob
