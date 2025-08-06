@@ -39,8 +39,6 @@ spec:
           enabled: true
           ingressClassName: external
           integrations:
-            traefik:
-              enabled: false
             certManager:
               enabled: true
               certificateIssuer: domain-0-le-prod
@@ -51,8 +49,6 @@ spec:
                   pathType: Prefix
     cnpg:
       main:
-        annotations:
-          cnpg.io/skipEmptyWalArchiveCheck: "enabled"
         mode: standalone
         cluster:
           singleNode: true

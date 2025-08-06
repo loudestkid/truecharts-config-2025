@@ -34,18 +34,22 @@ spec:
         ingressClassName: external
         annotations:
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-          nginx.ingress.kubernetes.io/auth-method: 'GET'
-          nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
-          nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
-          nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
+          # nginx.ingress.kubernetes.io/auth-method: 'GET'
+          # nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
+          # nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
+          # nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
         hosts:
           - host: ${TRUENAS_DNS_PREFIX}${DOMAIN_0}
             paths:
             - path: /
               pathType: Prefix
         integrations:
+          nginx:
+            enabled: true
+            auth:
+              type: "authelia"
+              internalHost: authelia.authelia.svc.cluster.local:9091
+              externalHost: ${AUTHELIA_DNS_PREFIX}${DOMAIN_0}
           certManager:
             certificateIssuer: domain-0-le-prod
             enabled: true
-          traefik:
-            enabled: false
