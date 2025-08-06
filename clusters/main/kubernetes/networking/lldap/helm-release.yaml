@@ -107,15 +107,10 @@ spec:
                         enabled: true
             main:
                 enabled: true
-                loadBalancerIP: ${LLDAP_IP}
                 ports:
                     main:
                         port: 17170
-                type: LoadBalancer
-                externalTrafficPolicy: Local
-                integrations:
-                    metallb:
-                        enabled: true
+                type: ClusterIP
         workload:
             main:
                 podSpec:
