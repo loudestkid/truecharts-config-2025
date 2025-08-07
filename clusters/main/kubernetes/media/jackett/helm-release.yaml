@@ -1,82 +1,84 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-    name: jackett
-    namespace: jackett
+  name: jackett
+  namespace: jackett
 spec:
-    interval: 15m
-    chart:
-        spec:
-            chart: jackett
-            version: 24.2.1
-            sourceRef:
-                kind: HelmRepository
-                name: truecharts
-                namespace: flux-system
-    releaseName: jackett
-    values:
-        TZ: America/Chicago
-        credentials:
-            cloudflare:
-                accessKey: ${VOLSYNC_ACCESS_KEY}
-                bucket: ${VOLSYNC_BUCKET_NAME}
-                encrKey: ${JACKETT_CONFIG_ENCRYPTION_KEY}
-                name: cloudflare
-                path: ""
-                secretKey: ${VOLSYNC_SECRET_KEY}
-                type: s3
-                url: ${VOLSYNC_S3_URL}
-        ingress:
-            main:
-                enabled: true
-                hosts:
-                    - host: ${JACKETT_DNS_PREFIX}${DOMAIN_0}
-                      paths:
-                        - path: /
-                          pathType: Prefix
-                ingressClassName: external
-                annotations:
-                    nginx.ingress.kubernetes.io/auth-method: 'GET'
-                    nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
-                    nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
-                    nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
-                integrations:
-                    certManager:
-                        certificateIssuer: domain-0-le-prod
-                        enabled: true
-                    traefik:
-                        enabled: false
-        persistence:
-            config:
-                enabled: true
-                mountPath: /config
-                readOnly: false
-                storageClass: ""
-                volsync:
-                    - credentials: cloudflare
-                      dest:
-                        enabled: false
-                      name: jackett-config-2025
-                      src:
-                        enabled: true
-                      type: restic
-        release_name: jackett
-        resources: {}
-        securityContext:
-            container:
-                UMASK: "0022"
-                runAsGroup: 0
-                runAsUser: 0
-            pod:
-                fsGroup: 0
-                fsGroupChangePolicy: OnRootMismatch
-        service:
-            main:
-                enabled: true
-                loadBalancerIP: ${JACKETT_IP}
-                ports:
-                    main:
-                        port: ${JACKETT_PORT}
-                        protocol: http
-                        targetPort: ${JACKETT_PORT}
-                type: LoadBalancer
+  interval: 15m
+  chart:
+    spec:
+      chart: jackett
+      version: 24.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: truecharts
+        namespace: flux-system
+  releaseName: jackett
+  values:
+    TZ: America/Chicago
+    credentials:
+      cloudflare:
+        accessKey: ${VOLSYNC_ACCESS_KEY}
+        bucket: ${VOLSYNC_BUCKET_NAME}
+        encrKey: ${JACKETT_CONFIG_ENCRYPTION_KEY}
+        name: cloudflare
+        path: ""
+        secretKey: ${VOLSYNC_SECRET_KEY}
+        type: s3
+        url: ${VOLSYNC_S3_URL}
+    ingress:
+      main:
+        enabled: true
+        hosts:
+          - host: ${JACKETT_DNS_PREFIX}${DOMAIN_0}
+            paths:
+              - path: /
+                pathType: Prefix
+        ingressClassName: external
+        integrations:
+          nginx:
+            enabled: true
+            auth:
+              type: authelia
+              internalHost: authelia.authelia.svc.cluster.local:9091
+              externalHost: ${AUTHELIA_DNS_PREFIX}${DOMAIN_0}
+          certManager:
+            certificateIssuer: domain-0-le-prod
+            enabled: true
+    persistence:
+      config:
+        enabled: true
+        mountPath: /config
+        readOnly: false
+        storageClass: ""
+        volsync:
+          - credentials: cloudflare
+            dest:
+              enabled: false
+            name: jackett-config-2025
+            src:
+              enabled: true
+            type: restic
+    release_name: jackett
+    resources: {}
+    securityContext:
+      container:
+        UMASK: "0022"
+        runAsGroup: 0
+        runAsUser: 0
+      pod:
+        fsGroup: 0
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      main:
+        enabled: true
+        loadBalancerIP: ${JACKETT_IP}
+        ports:
+          main:
+            port: ${JACKETT_PORT}
+            protocol: http
+            targetPort: ${JACKETT_PORT}
+        type: LoadBalancer
+        integrations:
+          metallb:
+            enabled: true
