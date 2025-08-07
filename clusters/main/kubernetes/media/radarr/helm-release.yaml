@@ -1,177 +1,179 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-    name: radarr
-    namespace: radarr
+  name: radarr
+  namespace: radarr
 spec:
-    interval: 15m
-    chart:
-        spec:
-            chart: radarr
-            version: 23.28.0
-            sourceRef:
-                kind: HelmRepository
-                name: truecharts
-                namespace: flux-system
-    releaseName: radarr
-    values:
-        TZ: America/Chicago
-        addons:
-            codeserver:
-                enabled: false
-            netshoot:
-                enabled: false
-            vpn:
-                type: disabled
-        credentials:
-            cloudflare:
-                accessKey: ${VOLSYNC_ACCESS_KEY}
-                bucket: ${VOLSYNC_BUCKET_NAME}
-                encrKey: ${RADARR_CONFIG_ENCRYPTION_KEY}
-                name: cloudflare
-                path: ""
-                secretKey: ${VOLSYNC_SECRET_KEY}
-                type: s3
-                url: ${VOLSYNC_S3_URL}
-        exportarrImage:
-            pullPolicy: IfNotPresent
-            repository: ghcr.io/onedr0p/exportarr
-            tag: v2.2.0@sha256:320b0ea7399f4b9af4741dcdddd7d40c05c36b0359679305d8a54df4e97065df
-        ingress:
-            main:
-                enabled: true
-                hosts:
-                    - host: ${RADARR_DNS_PREFIX}${DOMAIN_0}
-                      paths:
-                        - path: /
-                          pathType: Prefix
-                ingressClassName: external
-                annotations:
-                    nginx.ingress.kubernetes.io/auth-method: 'GET'
-                    nginx.ingress.kubernetes.io/auth-url: 'http://authelia.authelia.svc.cluster.local:9091/api/verify'
-                    nginx.ingress.kubernetes.io/auth-signin: 'https://${AUTHELIA_DNS_PREFIX}${DOMAIN_0}?rm=$request_method'
-                    nginx.ingress.kubernetes.io/auth-response-headers: 'Remote-User,Remote-Name,Remote-Groups,Remote-Email'
-                integrations:
-                    certManager:
-                        certificateIssuer: domain-0-le-prod
-                        enabled: true
-                    traefik:
-                        enabled: false
-        metrics:
-            main:
-                enabled: false
-                endpoints:
-                    - path: /metrics
-                      port: metrics
-                prometheusRule:
-                    enabled: false
-                targetSelector: metrics
-                type: servicemonitor
-        persistence:
-            config:
-                enabled: true
-                readOnly: false
-                storageClass: ""
-                targetSelector:
-                    exportarr:
-                        exportarr:
-                            mountPath: /config
-                            readOnly: true
-                    main:
-                        main:
-                            mountPath: /config
-                volsync:
-                    - credentials: cloudflare
-                      dest:
-                        enabled: true
-                      name: radarr-config
-                      src:
-                        enabled: false
-                      type: restic
-            media:
-                enabled: true
-                mountPath: /media
-                type: nfs
-                path: ${MEDIA_PATH}
-                server: ${TRUENAS_IP}
-        release_name: radarr
-        resources: {}
-        securityContext:
-            container:
-                UMASK: "0022"
-                readOnlyRootFilesystem: false
-        service:
-            main:
-                enabled: true
-                loadBalancerIP: ${RADARR_IP}
-                ports:
-                    main:
-                        port: 7878
-                type: LoadBalancer
-            metrics:
-                enabled: true
-                ports:
-                    metrics:
-                        enabled: true
-                        port: 7879
-                        targetSelector: exportarr
-                targetSelector: exportarr
-                type: ClusterIP
-        updated: true
-        workload:
+  interval: 15m
+  chart:
+    spec:
+      chart: radarr
+      version: 23.28.0
+      sourceRef:
+        kind: HelmRepository
+        name: truecharts
+        namespace: flux-system
+  releaseName: radarr
+  values:
+    TZ: America/Chicago
+    addons:
+      codeserver:
+        enabled: false
+      netshoot:
+        enabled: false
+      vpn:
+        type: disabled
+    credentials:
+      cloudflare:
+        accessKey: ${VOLSYNC_ACCESS_KEY}
+        bucket: ${VOLSYNC_BUCKET_NAME}
+        encrKey: ${RADARR_CONFIG_ENCRYPTION_KEY}
+        name: cloudflare
+        path: ""
+        secretKey: ${VOLSYNC_SECRET_KEY}
+        type: s3
+        url: ${VOLSYNC_S3_URL}
+    exportarrImage:
+      pullPolicy: IfNotPresent
+      repository: ghcr.io/onedr0p/exportarr
+      tag: v2.2.0@sha256:320b0ea7399f4b9af4741dcdddd7d40c05c36b0359679305d8a54df4e97065df
+    ingress:
+      main:
+        enabled: true
+        hosts:
+          - host: ${RADARR_DNS_PREFIX}${DOMAIN_0}
+            paths:
+              - path: /
+                pathType: Prefix
+        ingressClassName: external
+        integrations:
+          nginx:
+            enabled: true
+            auth:
+              type: authelia
+              internalHost: authelia.authelia.svc.cluster.local:9091
+              externalHost: ${AUTHELIA_DNS_PREFIX}${DOMAIN_0}
+          certManager:
+            certificateIssuer: domain-0-le-prod
+            enabled: true
+    metrics:
+      main:
+        enabled: false
+        endpoints:
+          - path: /metrics
+            port: metrics
+        prometheusRule:
+          enabled: false
+        targetSelector: metrics
+        type: servicemonitor
+    persistence:
+      config:
+        enabled: true
+        readOnly: false
+        storageClass: ""
+        targetSelector:
+          exportarr:
             exportarr:
-                enabled: true
-                podSpec:
-                    containers:
-                        exportarr:
-                            args:
-                                - radarr
-                            enabled: true
-                            env:
-                                CONFIG: /config/config.xml
-                                INTERFACE: 0.0.0.0
-                                PORT: '{{ .Values.service.metrics.ports.metrics.port }}'
-                                URL: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'
-                            imageSelector: exportarrImage
-                            primary: true
-                            probes:
-                                liveness:
-                                    enabled: true
-                                    path: /healthz
-                                    port: '{{ .Values.service.metrics.ports.metrics.port }}'
-                                    type: http
-                                readiness:
-                                    enabled: true
-                                    path: /healthz
-                                    port: '{{ .Values.service.metrics.ports.metrics.port }}'
-                                    type: http
-                                startup:
-                                    enabled: true
-                                    path: /healthz
-                                    port: '{{ .Values.service.metrics.ports.metrics.port }}'
-                                    type: http
-                replicas: 1
-                strategy: RollingUpdate
-                type: Deployment
+              mountPath: /config
+              readOnly: true
+          main:
             main:
-                podSpec:
-                    containers:
-                        main:
-                            env:
-                                RADARR__AUTHENTICATION_METHOD: ""
-                                RADARR__PORT: '{{ .Values.service.main.ports.main.port }}'
-                            probes:
-                                liveness:
-                                    enabled: true
-                                    path: /ping
-                                    type: http
-                                readiness:
-                                    enabled: true
-                                    path: /ping
-                                    type: http
-                                startup:
-                                    enabled: true
-                                    path: /ping
-                                    type: http
-                replicas: 1
-                type: Deployment
+              mountPath: /config
+        volsync:
+          - credentials: cloudflare
+            dest:
+              enabled: true
+            name: radarr-config
+            src:
+              enabled: false
+            type: restic
+      media:
+        enabled: true
+        mountPath: /media
+        type: nfs
+        path: ${MEDIA_PATH}
+        server: ${TRUENAS_IP}
+    release_name: radarr
+    resources: {}
+    securityContext:
+      container:
+        UMASK: "0022"
+        readOnlyRootFilesystem: false
+    service:
+      main:
+        enabled: true
+        loadBalancerIP: ${RADARR_IP}
+        ports:
+          main:
+            port: 7878
+        type: LoadBalancer
+        integrations:
+          metallb:
+            enabled: true
+      metrics:
+        enabled: true
+        ports:
+          metrics:
+            enabled: true
+            port: 7879
+            targetSelector: exportarr
+        targetSelector: exportarr
+        type: ClusterIP
+    updated: true
+    workload:
+      exportarr:
+        enabled: true
+        podSpec:
+          containers:
+            exportarr:
+              args:
+                - radarr
+              enabled: true
+              env:
+                CONFIG: /config/config.xml
+                INTERFACE: 0.0.0.0
+                PORT: "{{ .Values.service.metrics.ports.metrics.port }}"
+                URL: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'
+              imageSelector: exportarrImage
+              primary: true
+              probes:
+                liveness:
+                  enabled: true
+                  path: /healthz
+                  port: "{{ .Values.service.metrics.ports.metrics.port }}"
+                  type: http
+                readiness:
+                  enabled: true
+                  path: /healthz
+                  port: "{{ .Values.service.metrics.ports.metrics.port }}"
+                  type: http
+                startup:
+                  enabled: true
+                  path: /healthz
+                  port: "{{ .Values.service.metrics.ports.metrics.port }}"
+                  type: http
+        replicas: 1
+        strategy: RollingUpdate
+        type: Deployment
+      main:
+        podSpec:
+          containers:
+            main:
+              env:
+                RADARR__AUTHENTICATION_METHOD: ""
+                RADARR__PORT: "{{ .Values.service.main.ports.main.port }}"
+              probes:
+                liveness:
+                  enabled: true
+                  path: /ping
+                  type: http
+                readiness:
+                  enabled: true
+                  path: /ping
+                  type: http
+                startup:
+                  enabled: true
+                  path: /ping
+                  type: http
+        replicas: 1
+        type: Deployment
