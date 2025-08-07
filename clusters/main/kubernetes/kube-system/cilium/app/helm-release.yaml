@@ -77,4 +77,5 @@ spec:
     localRedirectPolicy: true
     operator:
       rollOutPods: true
+      replicas: 1 # Replicas can be removed here when additional nodes are added
     rollOutCiliumPods: true
