@@ -16,13 +16,6 @@ spec:
   releaseName: radarr
   values:
     TZ: America/Chicago
-    addons:
-      codeserver:
-        enabled: false
-      netshoot:
-        enabled: false
-      vpn:
-        type: disabled
     credentials:
       cloudflare:
         accessKey: ${VOLSYNC_ACCESS_KEY}
