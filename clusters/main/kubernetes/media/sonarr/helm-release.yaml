@@ -115,6 +115,57 @@ spec:
     workload:
       exportarr:
         enabled: true
+        podSpec:
+          containers:
+            exportarr:
+              args:
+                - sonarr
+              enabled: true
+              env:
+                CONFIG: /config/config.xml
+                INTERFACE: 0.0.0.0
+                PORT: "{{ .Values.service.metrics.ports.metrics.port }}"
+                URL: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'
+              imageSelector: exportarrImage
+              primary: true
+              probes:
+                liveness:
+                  enabled: true
+                  path: /healthz
+                  port: "{{ .Values.service.metrics.ports.metrics.port }}"
+                  type: http
+                readiness:
+                  enabled: true
+                  path: /healthz
+                  port: "{{ .Values.service.metrics.ports.metrics.port }}"
+                  type: http
+                startup:
+                  enabled: true
+                  path: /healthz
+                  port: "{{ .Values.service.metrics.ports.metrics.port }}"
+                  type: http
         replicas: 1
         strategy: RollingUpdate
+        type: Deployment
+      main:
+        podSpec:
+          containers:
+            main:
+              env:
+                SONARR__AUTHENTICATION_METHOD: ""
+                SONARR__PORT: "{{ .Values.service.main.ports.main.port }}"
+              probes:
+                liveness:
+                  enabled: true
+                  path: /ping
+                  type: http
+                readiness:
+                  enabled: true
+                  path: /ping
+                  type: http
+                startup:
+                  enabled: true
+                  path: /ping
+                  type: http
+        replicas: 1
         type: Deployment
