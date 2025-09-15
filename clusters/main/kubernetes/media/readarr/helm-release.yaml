@@ -43,7 +43,7 @@ spec:
       main:
         enabled: true
         hosts:
-          - host: ${RADARR_DNS_PREFIX}${DOMAIN_0}
+          - host: ${READARR_DNS_PREFIX}${DOMAIN_0}
             paths:
               - path: /
                 pathType: Prefix
