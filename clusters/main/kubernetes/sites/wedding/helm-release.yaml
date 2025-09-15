@@ -21,26 +21,26 @@ spec:
     keepHistory: false
   values:
     persistence:
-        media:
+      media:
         enabled: true
         mountPath: /media
         type: nfs
         path: ${MEDIA_PATH}
         server: ${TRUENAS_IP}
     ingress:
-        main:
-          enabled: true
-          ingressClassName: external
-          integrations:
-            nginx:
-              enabled: true
-            certManager:
-              enabled: true
-              certificateIssuer: domain-0-le-prod
-          hosts:
-            - host: ${WEDDING_DNS_PREFIX}${DOMAIN_0}
-              paths:
-                - path: /
-                  pathType: Prefix
+      main:
+        enabled: true
+        ingressClassName: external
+        integrations:
+          nginx:
+            enabled: true
+          certManager:
+            enabled: true
+            certificateIssuer: domain-0-le-prod
+        hosts:
+          - host: ${WEDDING_DNS_PREFIX}${DOMAIN_0}
+            paths:
+              - path: /
+                pathType: Prefix
 
 
