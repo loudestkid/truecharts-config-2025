@@ -20,6 +20,13 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    persistence:
+        media:
+        enabled: true
+        mountPath: /media
+        type: nfs
+        path: ${MEDIA_PATH}
+        server: ${TRUENAS_IP}
     ingress:
         main:
           enabled: true
