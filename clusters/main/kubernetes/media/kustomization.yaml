@@ -7,6 +7,6 @@ resources:
   - jackett
   - sonarr
   - radarr
-  - readarr
+  # - readarr
   - kavita
-  - calibre
+  # - calibre
