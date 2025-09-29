@@ -39,12 +39,6 @@ spec:
         secretKey: ${VOLSYNC_SECRET_KEY}
         type: s3
         url: ${VOLSYNC_S3_URL}
-    securityContext:
-      container:
-        runAsUser: 568
-        runAsGroup: 568
-        UMASK: "0022"
-        readOnlyRootFilesystem: false
     ingress:
       main:
         enabled: true
