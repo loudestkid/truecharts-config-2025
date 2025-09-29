@@ -43,6 +43,8 @@ spec:
       container:
         runAsUser: 568
         runAsGroup: 568
+        UMASK: "0022"
+        readOnlyRootFilesystem: false
     ingress:
       main:
         enabled: true
