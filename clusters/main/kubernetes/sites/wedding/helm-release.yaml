@@ -25,7 +25,7 @@ spec:
         enabled: true
         mountPath: /media
         type: nfs
-        path: ${MEDIA_PATH}
+        path: ${SITES_MEDIA_PATH}
         server: ${TRUENAS_IP}
     ingress:
       main:
