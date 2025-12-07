@@ -78,7 +78,7 @@ spec:
               enabled: true
             name: radarr-config
             src:
-              enabled: false
+              enabled: true
             type: restic
       media:
         enabled: true

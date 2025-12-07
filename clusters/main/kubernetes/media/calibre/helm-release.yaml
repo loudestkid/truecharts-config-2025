@@ -65,7 +65,7 @@ spec:
           type: restic
           credentials: cloudflare
           dest:
-            enabled: false
+            enabled: true
           src:
             enabled: true
       media:

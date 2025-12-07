@@ -75,7 +75,7 @@ spec:
         volsync:
           - credentials: cloudflare
             dest:
-              enabled: false
+              enabled: true
             name: qbt-config-2025
             src:
               enabled: true

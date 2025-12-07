@@ -36,7 +36,7 @@ spec:
                 volsync:
                     - credentials: cloudflare
                       dest:
-                        enabled: false
+                        enabled: true
                       name: plex-config-2025
                       src:
                         enabled: true
