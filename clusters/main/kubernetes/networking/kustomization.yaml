@@ -4,5 +4,5 @@ resources:
   - nginx-external/ks.yaml
   - nginx-internal/ks.yaml
   - cloudflared
-  # - lldap
-  # - authelia
+  - lldap
+  - authelia
