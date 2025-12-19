@@ -67,6 +67,7 @@ spec:
             enabled: true
     persistence:
       config:
+        mountPath: /config
         volsync:
           - name: kavita-config-2025
             type: restic
