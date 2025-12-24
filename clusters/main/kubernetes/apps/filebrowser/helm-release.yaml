@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: filebrowser
-      version: 12.27.3
+      version: 12.27.4
       sourceRef:
         kind: HelmRepository
         name: truecharts
