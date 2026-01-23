@@ -36,6 +36,18 @@ spec:
             FIREWALL_INPUT_PORTS: 10095,8000
             FIREWALL: "on"
             FIREWALL_OUTBOUND_SUBNETS: "${QBT_EXCLUDED_NETWORKS_01},${QBT_EXCLUDED_NETWORKS_02}"
+    configmap:
+      gluetun-auth-config:
+        enabled: true
+        data:
+          config.toml: >-
+            [[roles]]
+
+            name = "qbittorrent"
+
+            routes = ["GET /v1/vpn/status","GET /v1/publicip/ip","GET /v1/openvpn/portforwarded"]
+
+            auth = "none"
     credentials:
       cloudflare:
         accessKey: ${VOLSYNC_ACCESS_KEY}
@@ -86,6 +98,14 @@ spec:
         type: nfs
         path: ${MEDIA_PATH}
         server: ${TRUENAS_IP}
+      gluetun-auth-config:
+        enabled: true
+        type: configmap
+        mountPath: /gluetun/auth/config.toml
+        objectName: gluetun-auth-config
+        readOnly: true
+        subPath: config.toml
+        targetSelectAll: true
     qbitportforward:
       QBT_PASSWORD: ${QBT_PASSWORD}
       QBT_USERNAME: ${QBT_USERNAME}
