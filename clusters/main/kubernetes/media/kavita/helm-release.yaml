@@ -57,7 +57,7 @@ spec:
                 pathType: Prefix
         integrations:
           nginx:
-            enabled: true
+            enabled: false
             # auth:
             #   type: authelia
             #   internalHost: authelia.authelia.svc.cluster.local:9091
