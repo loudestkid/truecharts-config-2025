@@ -84,7 +84,7 @@ nodes:
                 officialExtensions:
                     - siderolabs/util-linux-tools
                     - siderolabs/iscsi-tools
-                    - siderolabs/qemu-guest-agent
+                    # - siderolabs/qemu-guest-agent
                     # - siderolabs/nonfree-kmod-nvidia-lts
                     # - siderolabs/nvidia-container-toolkit-lts
       # patches:
