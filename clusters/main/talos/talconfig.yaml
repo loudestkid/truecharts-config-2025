@@ -52,6 +52,37 @@ nodes:
         main: yes
         hasGpu: yes
         plexCapable: yes
+    - hostname: k8s-control-2
+      ipAddress: ${MASTER2IP_IP}
+      controlPlane: true
+      nameservers:
+        - 1.1.1.1
+        - 8.8.8.8
+      installDiskSelector:
+        size: <= 1600GB
+      networkInterfaces:
+        # suffix is the adapter mac adres.
+        - interface: enp3s0f1
+          addresses:
+            - ${MASTER2IP_CIDR}
+          routes:
+            - network: 0.0.0.0/0
+              gateway: ${GATEWAY}
+          vip:
+            ip: ${VIP}
+      schematic:
+        customization:
+            systemExtensions:
+                officialExtensions:
+                    - siderolabs/nonfree-kmod-nvidia-lts
+                    - siderolabs/nvidia-container-toolkit-lts
+      patches:
+        - "@./patches/nvidia.yaml"
+      nodeLabels:
+        main: yes
+        hasGpu: yes
+        plexCapable: yes
+      
 controlPlane:
     patches:
         - '@./patches/controlplane.yaml'
