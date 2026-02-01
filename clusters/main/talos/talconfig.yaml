@@ -40,6 +40,14 @@ nodes:
               gateway: ${GATEWAY}
           vip:
             ip: ${VIP}
+      schematic:
+        customization:
+            systemExtensions:
+                officialExtensions:
+                    - siderolabs/util-linux-tools
+                    - siderolabs/iscsi-tools
+                    - siderolabs/qemu-guest-agent
+
       # schematic:
       #   customization:
       #       systemExtensions:
@@ -70,12 +78,15 @@ nodes:
               gateway: ${GATEWAY}
           vip:
             ip: ${VIP}
-      # schematic:
-      #   customization:
-      #       systemExtensions:
-      #           officialExtensions:
-      #               - siderolabs/nonfree-kmod-nvidia-lts
-      #               - siderolabs/nvidia-container-toolkit-lts
+      schematic:
+        customization:
+            systemExtensions:
+                officialExtensions:
+                    - siderolabs/util-linux-tools
+                    - siderolabs/iscsi-tools
+                    - siderolabs/qemu-guest-agent
+                    # - siderolabs/nonfree-kmod-nvidia-lts
+                    # - siderolabs/nvidia-container-toolkit-lts
       # patches:
       #   - "@./patches/nvidia.yaml"
       nodeLabels:
@@ -98,7 +109,7 @@ controlPlane:
                 officialExtensions:
                     - siderolabs/util-linux-tools
                     - siderolabs/iscsi-tools
-                    - siderolabs/qemu-guest-agent
+                    # - siderolabs/qemu-guest-agent
     machineFiles:
     - content: |
         [plugins."io.containerd.cri.v1.images"]
