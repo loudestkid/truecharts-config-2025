@@ -46,7 +46,7 @@ spec:
         ingressClassName: external
         integrations:
           nginx:
-            enabled: false
+            enabled: true
             auth:
               type: authelia
               internalHost: authelia.authelia.svc.cluster.local:9091

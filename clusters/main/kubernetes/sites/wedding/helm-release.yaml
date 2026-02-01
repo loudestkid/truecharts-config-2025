@@ -33,7 +33,7 @@ spec:
         ingressClassName: external
         integrations:
           nginx:
-            enabled: false
+            enabled: true
           certManager:
             enabled: true
             certificateIssuer: domain-0-le-prod
