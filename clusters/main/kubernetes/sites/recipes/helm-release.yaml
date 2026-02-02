@@ -20,6 +20,26 @@ spec:
   uninstall:
     keepHistory: false
   values:
+    credentials:
+      cloudflare:
+        accessKey: ${VOLSYNC_ACCESS_KEY}
+        bucket: ${VOLSYNC_BUCKET_NAME}
+        encrKey: ${RECIPES_CONFIG_ENCRYPTION_KEY}
+        name: cloudflare
+        path: ""
+        secretKey: ${VOLSYNC_SECRET_KEY}
+        type: s3
+        url: ${VOLSYNC_S3_URL}
+    persistence:
+      config:
+        volsync:
+          - name: recipes-config-2025
+            type: restic
+            credentials: cloudflare
+            dest:
+              enabled: true
+            src:
+              enabled: true
     ingress:
         main:
           enabled: true
