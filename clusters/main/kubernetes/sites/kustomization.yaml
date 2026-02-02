@@ -4,4 +4,4 @@ resources:
   - namespace.yaml
   - andrew
   - recipes
-  - wedding
+  # - wedding
