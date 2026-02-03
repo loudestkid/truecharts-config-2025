@@ -13,4 +13,5 @@ resources:
   - spegel.yaml
   - truecharts.yaml
   - metallb.yaml
+  - openebs.yaml
 # more goes here!
