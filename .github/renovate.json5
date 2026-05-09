@@ -3,5 +3,11 @@
   "extends": [
     "config:recommended",
     "github>truecharts/public//.github/renovate/main.json5"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["ghcr.io/siderolabs/installer"],
+      "allowedVersions": "v1.12.2"
+    }
   ]
 }
