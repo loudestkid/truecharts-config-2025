@@ -40,8 +40,7 @@ spec:
                       name: plex-config-2025
                       src:
                         enabled: true
-                        restic:
-                          cacheCapacity: 25Gi
+                        cacheCapacity: 25Gi
                       type: restic
             transcode:
                 enabled: true
