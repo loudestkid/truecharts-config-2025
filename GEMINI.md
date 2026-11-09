@@ -84,6 +84,16 @@ Starting with TrueCharts **Common Library 30.4.0+** (released Nov 2026), charts 
 
 ## 4. Key CLI Tools & Commands
 
+### Investigating & Applying Renovate Major Upgrades
+Use the upgrade investigator tool (or the `major-upgrade-investigator` skill):
+```bash
+# Analyze a Renovate PR/commit string
+./scripts/investigate-upgrade.py "chore(flux): update image blocky 22.25.1 → 24.1.2"
+
+# Automatically apply the version bump if safe
+./scripts/investigate-upgrade.py "chore(flux): update image blocky 22.25.1 → 24.1.2" --apply
+```
+
 ### Validating Schemas Locally
 Use the built-in validator script:
 ```bash
