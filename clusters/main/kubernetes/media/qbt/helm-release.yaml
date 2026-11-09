@@ -26,15 +26,12 @@ spec:
             limits:
               truecharts.org/tun: 1
           env:
-            VPN_ENDPOINT_IP: ${VPN_ENDPOINT_IP}
-            VPN_ENDPOINT_PORT: ${VPN_ENDPOINT_PORT}
-            VPN_PORT_FORWARDING: "on"
-            VPN_PORT_FORWARDING_PROVIDER: protonvpn
-            VPN_SERVICE_PROVIDER: custom
+            VPN_SERVICE_PROVIDER: protonvpn
             VPN_TYPE: wireguard
-            WIREGUARD_ADDRESSES: ${VPN_WIREGUARD_ADDRESSES}
             WIREGUARD_PRIVATE_KEY: ${VPN_WIREGUARD_PRIVATE_KEY}
-            WIREGUARD_PUBLIC_KEY: ${VPN_WIREGUARD_PUBLIC_KEY}
+            SERVER_COUNTRIES: Netherlands
+            PORT_FORWARD_ONLY: "on"
+            VPN_PORT_FORWARDING: "on"
             FIREWALL_INPUT_PORTS: 10095,8000
             FIREWALL: "on"
             FIREWALL_OUTBOUND_SUBNETS: "${QBT_EXCLUDED_NETWORKS_01},${QBT_EXCLUDED_NETWORKS_02}"
@@ -47,7 +44,7 @@ spec:
 
             name = "qbittorrent"
 
-            routes = ["GET /v1/vpn/status","GET /v1/publicip/ip","GET /v1/openvpn/portforwarded"]
+            routes = ["GET /v1/vpn/status","GET /v1/publicip/ip","GET /v1/openvpn/portforwarded","GET /v1/portforward"]
 
             auth = "none"
     credentials:
