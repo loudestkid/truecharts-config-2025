@@ -44,7 +44,7 @@ spec:
 
             name = "qbittorrent"
 
-            routes = ["GET /v1/vpn/status","GET /v1/publicip/ip","GET /v1/openvpn/portforwarded","GET /v1/portforward"]
+            routes = ["GET /v1/vpn/status","GET /v1/publicip/ip","GET /v1/openvpn/portforwarded"]
 
             auth = "none"
     credentials:
@@ -165,7 +165,10 @@ spec:
         podSpec:
           containers:
             qbitportforward:
-              command: /usr/src/app/main.sh
+              command:
+                - /bin/sh
+                - -c
+                - sed 's|/v1/portforward|/v1/openvpn/portforwarded|g' /usr/src/app/main.sh | /bin/sh
               env:
                 GTN_ADDR: '{{ printf "http://%v-gluetun:8000" (include "tc.v1.common.lib.chart.names.fullname" $) }}'
                 QBT_ADDR: '{{ printf "http://%v:%v" (include "tc.v1.common.lib.chart.names.fullname" $) .Values.service.main.ports.main.port }}'

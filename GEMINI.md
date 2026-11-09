@@ -24,19 +24,23 @@ This file serves as the persistent project manual for AI coding assistants (Anti
 
 ```
 truecharts-config-2025/
-├── clusters/main/kubernetes/    # Primary Kubernetes cluster manifests
-│   ├── apps/                    # filebrowser, kubernetes-dashboard, truenas-access
-│   ├── core/                    # blocky, clusterissuer, metallb-config
-│   ├── kube-system/             # cilium, descheduler, kubelet-csr-approver, metrics-server, etc.
-│   ├── media/                   # calibre, jackett, kavita, minio, plex, qbt, radarr, sonarr
-│   ├── networking/              # authelia, cloudflared, lldap, nginx-external, nginx-internal
-│   ├── sites/                   # andrew, recipes, wedding (Grav sites)
-│   ├── system/                  # cert-manager, cloudnative-pg, longhorn, spegel, volsync, etc.
-│   ├── flux-system/             # Flux controller configuration
-│   └── flux-entry.yaml          # Root Flux kustomization entrypoint
+├── clusters/main/
+│   ├── clusterenv.yaml          # Source environment/secrets file for ClusterTool (edit here!)
+│   ├── talos/                   # Talos OS configuration (talconfig.yaml) and generated node configs
+│   └── kubernetes/              # Primary Kubernetes cluster manifests
+│       ├── apps/                # filebrowser, kubernetes-dashboard, truenas-access
+│       ├── core/                # blocky, clusterissuer, metallb-config
+│       ├── kube-system/         # cilium, descheduler, kubelet-csr-approver, metrics-server, etc.
+│       ├── media/               # calibre, jackett, kavita, minio, plex, qbt, radarr, sonarr
+│       ├── networking/          # authelia, cloudflared, lldap, nginx-external, nginx-internal
+│       ├── sites/               # andrew, recipes, wedding (Grav sites)
+│       ├── system/              # cert-manager, cloudnative-pg, longhorn, spegel, volsync, etc.
+│       ├── flux-system/         # Flux controller configuration & generated clustersettings.secret.yaml
+│       └── flux-entry.yaml      # Root Flux kustomization entrypoint
 ├── repositories/                # HelmRepository, GitRepository, and OCIRepository definitions
 ├── scripts/                     # Local maintenance and validation scripts
 │   └── validate-schemas.py      # Automated TrueCharts JSON schema validator
+├── clustertool                  # Local ClusterTool binary (genconfig, encrypt, decrypt, etc.)
 ├── GEMINI.md                    # This persistent reference file
 └── age.agekey                   # SOPS encryption age key (keep secure)
 ```
@@ -83,6 +87,20 @@ Starting with TrueCharts **Common Library 30.4.0+** (released Nov 2026), charts 
 ---
 
 ## 4. Key CLI Tools & Commands
+
+### ClusterTool & Secrets Management (`clusterenv.yaml`)
+- **IMPORTANT:** Do **NOT** manually edit `clusters/main/kubernetes/flux-system/flux/clustersettings.secret.yaml` or files in `clusters/main/talos/generated/`.
+- Instead, edit variables/secrets in `clusters/main/clusterenv.yaml` and use `./clustertool` in the repository root:
+  ```bash
+  # Decrypt secrets
+  ./clustertool decrypt
+
+  # Regenerate clustersettings.secret.yaml and Talos configs from clusterenv.yaml & talconfig.yaml
+  ./clustertool genconfig
+
+  # Encrypt secrets before committing
+  ./clustertool encrypt
+  ```
 
 ### Investigating & Applying Renovate Major Upgrades
 Use the upgrade investigator tool (or the `major-upgrade-investigator` skill):
