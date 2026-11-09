@@ -123,28 +123,11 @@ helm template authelia ./authelia -f values.yaml --kube-version 1.33.0
 
 ---
 
-## 5. Ongoing Work & Next Steps
+## 5. Status & History
 
-When picking up work on this repo:
-
-1. **Authelia (`clusters/main/kubernetes/networking/authelia/helm-release.yaml`):**
-   - Cleaned up schema header, removed `credentials.cloudflare.name`, removed redundant `recovery:` block.
-   - Ready to commit and push.
-
-2. **Remaining Deployments to Fix (Failing `./scripts/validate-schemas.py`):**
-   - **`credentials.cloudflare.name` redundancy (10 releases):**
-     - `clusters/main/kubernetes/apps/filebrowser/helm-release.yaml`
-     - `clusters/main/kubernetes/media/calibre/helm-release.yaml`
-     - `clusters/main/kubernetes/media/jackett/helm-release.yaml`
-     - `clusters/main/kubernetes/media/kavita/helm-release.yaml`
-     - `clusters/main/kubernetes/media/plex/helm-release.yaml` *(upgrade to 23.1.2 blocked by this)*
-     - `clusters/main/kubernetes/media/qbt/helm-release.yaml`
-     - `clusters/main/kubernetes/media/radarr/helm-release.yaml`
-     - `clusters/main/kubernetes/media/sonarr/helm-release.yaml`
-     - `clusters/main/kubernetes/sites/recipes/helm-release.yaml`
-     - `clusters/main/kubernetes/sites/wedding/helm-release.yaml`
-   - **`lldap` (`clusters/main/kubernetes/networking/lldap/helm-release.yaml`):**
-     - Remove `credentials.cloudflare.name`
-     - Remove `cnpg.main.recovery.enabled`
-     - Fix `cnpg.main.backups.retentionPolicy: ""` (remove or set valid interval)
-     - Fix `LLDAP_JWT_SECRET` format under `workload.main.podSpec.containers.main.env`
+1. **Schema Validation Pass:**
+   - All 26 TrueCharts `HelmRelease` manifests now pass validation against the published `30.4.5` schema (`./scripts/validate-schemas.py` reports 26/26 valid).
+2. **Fixed Releases:**
+   - `authelia`: Cleaned up schema header, removed `credentials.cloudflare.name`, removed redundant `recovery:` block. Successfully deployed and running.
+   - `lldap`: Switched to `mode: standalone`, removed redundant `recovery:` block, removed empty `retentionPolicy: ""`, removed `credentials.cloudflare.name`, and removed redundant `LLDAP_JWT_SECRET` override so chart auto-binding takes over.
+   - Removed obsolete `name: cloudflare` from credentials in: `filebrowser`, `calibre`, `jackett`, `kavita`, `plex`, `qbittorrent-main`, `radarr`, `sonarr`, `recipes`, and `wedding`.

@@ -1,4 +1,6 @@
 ---
+---
+# yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/30.4.4.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -35,7 +37,6 @@ spec:
         accessKey: ${VOLSYNC_ACCESS_KEY}
         bucket: ${VOLSYNC_BUCKET_NAME}
         encrKey: ${KAVITA_CONFIG_ENCRYPTION_KEY}
-        name: cloudflare
         path: ""
         secretKey: ${VOLSYNC_SECRET_KEY}
         type: s3
