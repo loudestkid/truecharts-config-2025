@@ -98,6 +98,46 @@ def find_commits_for_versions(chart_rel_path, old_version, new_version):
     return old_commit, new_commit
 
 
+def load_clusterenv():
+    """Loads clusters/main/clusterenv.yaml and enforces that secrets are decrypted."""
+    env_file = REPO_ROOT / "clusters" / "main" / "clusterenv.yaml"
+    if not env_file.exists():
+        sys.exit(f"{RED}Error:{RESET} clusters/main/clusterenv.yaml not found at {env_file}")
+
+    with open(env_file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    if "sops:" in content:
+        sys.exit(
+            f"{RED}Error:{RESET} clusters/main/clusterenv.yaml is encrypted with SOPS.\n"
+            f"Please decrypt the secrets file first by running:\n"
+            f"  {BOLD}{CYAN}./clustertool decrypt{RESET}\n"
+            f"Then re-run this investigation tool."
+        )
+
+    try:
+        parsed = yaml.safe_load(content)
+        if not isinstance(parsed, dict):
+            sys.exit(f"{RED}Error:{RESET} Failed to parse clusters/main/clusterenv.yaml as a dictionary.")
+        return {str(k): str(v) for k, v in parsed.items() if v is not None}
+    except Exception as e:
+        sys.exit(f"{RED}Error:{RESET} Could not parse clusters/main/clusterenv.yaml: {e}")
+
+
+def substitute_env_vars(data, env_vars):
+    """Recursively replaces ${VAR} in values using clusterenv variables."""
+    if isinstance(data, str):
+        def repl(m):
+            var_name = m.group(1)
+            return env_vars.get(var_name, m.group(0))
+        return re.sub(r"\$\{([^}]+)\}", repl, data)
+    elif isinstance(data, dict):
+        return {k: substitute_env_vars(v, env_vars) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [substitute_env_vars(elem, env_vars) for elem in data]
+    return data
+
+
 def find_local_manifest(chart_name):
     """Finds the HelmRelease manifest in clusters/main/kubernetes for the chart."""
     manifests = list(REPO_ROOT.glob("clusters/main/kubernetes/**/helm-release.yaml"))
@@ -148,6 +188,9 @@ def main():
 
     if not (chart and old_ver and new_ver):
         sys.exit(f"{RED}Error:{RESET} Could not parse chart, old version, and new version from input.\nUsage: {parser.prog} 'chore(flux): update image <chart> <old> → <new>'")
+
+    # Enforce decrypted clusterenv.yaml so substitutions succeed during Helm templating
+    env_vars = load_clusterenv()
 
     print(f"\n{BOLD}{CYAN}=== Investigating Major Version Upgrade ==={RESET}")
     print(f"Chart:       {BOLD}{chart}{RESET}")
@@ -235,10 +278,11 @@ def main():
             print(f"  {YELLOW}Notice:{RESET} Could not pull chart from OCI ({res_pull.stderr.strip()}). Checking local chart...")
             chart_dest = chart_dir
 
-        # Write values to temp file
+        # Write values to temp file with clusterenv substitutions applied
         val_file = Path(tmpdir) / "values.yaml"
+        substituted_values = substitute_env_vars(values, env_vars)
         with open(val_file, "w", encoding="utf-8") as f:
-            yaml.dump(values, f)
+            yaml.dump(substituted_values, f)
 
         cmd_template = ["helm", "template", chart, str(chart_dest), "-f", str(val_file), "--kube-version", "1.33.0"]
         res_template = subprocess.run(cmd_template, capture_output=True, text=True)

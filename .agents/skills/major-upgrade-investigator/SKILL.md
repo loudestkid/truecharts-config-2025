@@ -25,6 +25,15 @@ Activate this skill when:
 
 When given an upgrade string (e.g. `chore(flux): update image <chart> <old> → <new>`):
 
+### Step 0: Ensure Secrets Are Decrypted (Prerequisite)
+The investigation script renders Helm templates against local values, which require real cluster substitutions (e.g. S3 endpoints, IPs, passwords) from `clusters/main/clusterenv.yaml`.
+- The script strictly enforces that `clusters/main/clusterenv.yaml` is decrypted.
+- If `clusters/main/clusterenv.yaml` is encrypted with SOPS, stop and prompt the user to decrypt first:
+  ```bash
+  ./clustertool decrypt
+  ```
+- Only after the user confirms decryption (or if already decrypted), proceed to run the tool.
+
 ### Step 1: Run the Automated Investigation Tool
 Execute the built-in investigation script:
 ```bash
