@@ -61,6 +61,13 @@ spec:
             requireHTTPS: false
             serverIP: ${PLEX_IP}
         release_name: plex
+        resources:
+            limits:
+                cpu: 4000m
+                memory: 24Gi
+            requests:
+                cpu: 500m
+                memory: 2000Mi
         service:
             main:
                 enabled: true
