@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/30.4.4.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -9,7 +10,7 @@ spec:
   chart:
     spec:
       chart: metallb-config
-      version: 10.10.1
+      version: 11.1.6
       sourceRef:
         kind: HelmRepository
         name: truecharts
