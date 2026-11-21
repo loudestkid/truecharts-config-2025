@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-11-21T22:32:23.137238+00:00",
+  "truenas_host": "192.168.1.80",
+  "truenas_version": "TrueNAS-SCALE-24.10.2.4",
+  "update_trains": {
+    "trains": {
+      "TrueNAS-SCALE-ElectricEel": {
+        "description": "TrueNAS SCALE ElectricEel 24.10 [release]"
+      },
+      "TrueNAS-SCALE-Fangtooth": {
+        "description": "TrueNAS SCALE Fangtooth 25.04 [release]"
+      },
+      "TrueNAS-SCALE-Goldeye": {
+        "description": "TrueNAS SCALE Goldeye 25.10"
+      }
+    },
+    "current": "TrueNAS-SCALE-ElectricEel",
+    "selected": "TrueNAS-SCALE-ElectricEel"
+  },
+  "pools": [
+    {
+      "name": "boot-pool",
+      "size": "1.80T",
+      "alloc": "15.9G",
+      "free": "1.78T",
+      "health": "ONLINE"
+    },
+    {
+      "name": "main",
+      "size": "102T",
+      "alloc": "14.2T",
+      "free": "87.7T",
+      "health": "ONLINE"
+    }
+  ],
+  "zvols": {
+    "main/talos-zvol": {
+      "properties": [
+        "main/talos-zvol",
+        "290G",
+        "62.2T",
+        "290G",
+        "512G"
+      ],
+      "snapshots": []
+    }
+  },
+  "vms": [
+    {
+      "id": 12,
+      "name": "talos",
+      "description": "",
+      "vcpus": 1,
+      "memory": 65536,
+      "min_memory": null,
+      "autostart": true,
+      "time": "LOCAL",
+      "bootloader": "UEFI",
+      "cores": 5,
+      "threads": 2,
+      "hyperv_enlightenments": false,
+      "shutdown_timeout": 90,
+      "cpu_mode": "HOST-MODEL",
+      "cpu_model": null,
+      "cpuset": "",
+      "nodeset": "",
+      "pin_vcpus": false,
+      "hide_from_msr": false,
+      "suspend_on_snapshot": false,
+      "ensure_display_device": true,
+      "arch_type": null,
+      "machine_type": null,
+      "uuid": "2a9aa883-d75f-4905-9960-c96f27e9c5c2",
+      "command_line_args": "",
+      "bootloader_ovmf": "OVMF_CODE.fd",
+      "trusted_platform_module": false,
+      "enable_cpu_topology_extension": false,
+      "devices": [
+        {
+          "id": 57,
+          "dtype": "DISK",
+          "attributes": {
+            "path": "/dev/zvol/main/talos-zvol",
+            "type": "VIRTIO",
+            "physical_sectorsize": null,
+            "logical_sectorsize": null,
+            "iotype": "THREADS"
+          },
+          "order": 1001,
+          "vm": 12
+        },
+        {
+          "id": 58,
+          "dtype": "NIC",
+          "attributes": {
+            "type": "VIRTIO",
+            "mac": "00:a0:98:41:4f:cf",
+            "nic_attach": "br001",
+            "trust_guest_rx_filters": false
+          },
+          "order": 1002,
+          "vm": 12
+        },
+        {
+          "id": 60,
+          "dtype": "DISPLAY",
+          "attributes": {
+            "port": 5900,
+            "bind": "0.0.0.0",
+            "password": "REDACTED_ON_BACKUP",
+            "web": true,
+            "type": "SPICE",
+            "resolution": "1024x768",
+            "web_port": 5901,
+            "wait": false
+          },
+          "order": 1002,
+          "vm": 12
+        }
+      ],
+      "display_available": true,
+      "status": {
+        "state": "RUNNING",
+        "pid": 7320,
+        "domain_state": "RUNNING"
+      }
+    }
+  ]
+}
