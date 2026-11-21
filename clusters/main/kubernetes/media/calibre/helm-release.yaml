@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/30.4.4.schema.json
+# yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/32.3.0.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
