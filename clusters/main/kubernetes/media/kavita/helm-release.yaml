@@ -77,6 +77,8 @@ spec:
               enabled: true
             src:
               enabled: true
+      manga:
+        enabled: false
       media:
         enabled: true
         mountPath: /media

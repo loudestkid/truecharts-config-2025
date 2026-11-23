@@ -58,7 +58,7 @@ spec:
               enabled: true
             name: filebrowser-config
             src:
-              enabled: false
+              enabled: true
             type: restic
       data:
         autoPermissions:
@@ -80,7 +80,7 @@ spec:
               enabled: true
             name: filebrowser-database
             src:
-              enabled: false
+              enabled: true
             type: restic
     release_name: filebrowser
     resources: {}
