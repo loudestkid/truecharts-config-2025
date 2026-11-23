@@ -98,6 +98,139 @@ def find_commits_for_versions(chart_rel_path, old_version, new_version):
     return old_commit, new_commit
 
 
+def get_chart_info_at_commit(chart_rel_path, commit):
+    """Returns parsed Chart.yaml at a given commit (or HEAD/working tree)."""
+    chart_yaml_path = f"{chart_rel_path}/Chart.yaml"
+    if not commit:
+        head_chart = TRUECHARTS_REPO / chart_yaml_path
+        if head_chart.is_file():
+            with open(head_chart, "r", encoding="utf-8") as f:
+                return yaml.safe_load(f) or {}
+        return {}
+    cmd_show = ["git", "-C", str(TRUECHARTS_REPO), "show", f"{commit}:{chart_yaml_path}"]
+    res_show = subprocess.run(cmd_show, capture_output=True, text=True)
+    if res_show.returncode == 0:
+        try:
+            return yaml.safe_load(res_show.stdout) or {}
+        except Exception:
+            return {}
+    return {}
+
+
+def get_common_version(chart_data):
+    """Extracts the 'common' dependency version from Chart.yaml data."""
+    for dep in chart_data.get("dependencies", []) or []:
+        if isinstance(dep, dict) and dep.get("name") == "common":
+            return str(dep.get("version", ""))
+    return None
+
+
+def analyze_common2026_risks(values, old_common_ver, new_common_ver):
+    """
+    Detects breaking changes when upgrading a chart to Common-2026 (common >= 32.0.0),
+    specifically around CNPG -> dependencies.postgresql, Barman Cloud plugin, PG 18 default,
+    and other dependency migrations.
+    """
+    warnings = []
+    blockers = []
+
+    def is_v32_or_newer(v):
+        if not v:
+            return False
+        m = re.match(r"^(\d+)\.", str(v))
+        return bool(m and int(m.group(1)) >= 32)
+
+    moving_to_common2026 = is_v32_or_newer(new_common_ver) and not is_v32_or_newer(old_common_ver)
+    on_common2026 = is_v32_or_newer(new_common_ver)
+
+    if moving_to_common2026:
+        warnings.append(
+            f"{BOLD}Common-2026 (32.x) Major Rework Detected:{RESET} "
+            f"Underlying common library jumps from {YELLOW}{old_common_ver or 'unknown'}{RESET} → {GREEN}{new_common_ver}{RESET}."
+        )
+
+    if not isinstance(values, dict):
+        return warnings, blockers
+
+    # 1. Check legacy top-level cnpg block
+    cnpg = values.get("cnpg")
+    if isinstance(cnpg, dict):
+        for cname, ccfg in cnpg.items():
+            if isinstance(ccfg, dict) and ccfg.get("enabled", True) is not False:
+                if on_common2026:
+                    blockers.append(
+                        f"{BOLD}[CNPG → dependencies.postgresql Migration Required]{RESET}\n"
+                        f"    • Top-level {RED}cnpg.{cname}{RESET} fails rendering in Common-2026 (32.0.0+).\n"
+                        f"    • Rewrite under {GREEN}dependencies.postgresql{RESET}:\n"
+                        f"      - Set {CYAN}dependencies.postgresql.enabled: true{RESET} (default mode is {CYAN}operator{RESET}).\n"
+                        f"      - Move {CYAN}user{RESET}, {CYAN}database{RESET}, and {CYAN}password{RESET} to {CYAN}dependencies.postgresql.depconfig{RESET} as "
+                        f"{CYAN}postgresqlUsername{RESET}, {CYAN}postgresqlDatabase{RESET}, and {CYAN}password{RESET} (or omit user/db if chart defaults apply).\n"
+                        f"      - Move {CYAN}cluster{RESET}, {CYAN}backups{RESET}, {CYAN}recovery{RESET}, {CYAN}monitoring{RESET}, {CYAN}pooler{RESET}, and {CYAN}pgVersion{RESET} "
+                        f"under {CYAN}dependencies.postgresql.operator{RESET}.\n"
+                        f"    • {YELLOW}Pin PostgreSQL Version:{RESET} Common-2026 defaults to {BOLD}PostgreSQL 18{RESET} (Debian 13 / Trixie) and triggers an automatic in-place "
+                        f"{CYAN}pg_upgrade{RESET} if unset! Explicitly set {CYAN}dependencies.postgresql.operator.pgVersion: {ccfg.get('pgVersion', 16)}{RESET} before upgrading to stay on your current version.\n"
+                        f"    • {YELLOW}Barman Cloud Plugin Required:{RESET} In-tree Barman is removed. Backups/recovery now spawn {CYAN}barmancloud.cnpg.io/v1 ObjectStore{RESET} resources "
+                        f"and require {BOLD}plugin-barman-cloud{RESET} (plus CNPG >= 1.26 and cert-manager) installed in the CNPG operator namespace."
+                    )
+                else:
+                    warnings.append(
+                        f"Chart uses legacy {CYAN}cnpg.{cname}{RESET}. Note that when this chart eventually moves to Common-2026 (32.x), "
+                        f"it will require migrating to {CYAN}dependencies.postgresql{RESET} and the CNPG {CYAN}plugin-barman-cloud{RESET}."
+                    )
+
+    # 2. Check new dependencies.postgresql block on Common-2026
+    deps = values.get("dependencies")
+    if isinstance(deps, dict) and isinstance(deps.get("postgresql"), dict):
+        pg_dep = deps["postgresql"]
+        if pg_dep.get("enabled", True) is not False and pg_dep.get("mode", "operator") == "operator":
+            op = pg_dep.get("operator") or {}
+            if "pgVersion" not in op:
+                warnings.append(
+                    f"{BOLD}[PostgreSQL 18 Default Warning]{RESET} {CYAN}dependencies.postgresql.operator.pgVersion{RESET} is not explicitly set. "
+                    f"Common-2026 defaults to {BOLD}PostgreSQL 18{RESET} and will run an in-place {CYAN}pg_upgrade{RESET} on existing clusters. "
+                    f"Set {CYAN}pgVersion: 16{RESET} (or your current version) to prevent an unplanned major DB upgrade."
+                )
+            backups_enabled = isinstance(op.get("backups"), dict) and op["backups"].get("enabled")
+            is_recovery = op.get("mode") == "recovery"
+            if backups_enabled or is_recovery:
+                warnings.append(
+                    f"{BOLD}[CNPG Barman Cloud Plugin Prerequisite]{RESET} Backups/recovery are enabled under {CYAN}dependencies.postgresql.operator{RESET}. "
+                    f"Ensure {BOLD}plugin-barman-cloud{RESET} ({CYAN}barmancloud.cnpg.io/v1/ObjectStore{RESET}) is deployed in the CNPG operator namespace before applying."
+                )
+            if isinstance(op.get("backups"), dict) and op["backups"].get("manualBackups"):
+                warnings.append(
+                    f"{BOLD}[Immutable Manual Backups]{RESET} Delete or rename existing CNPG {CYAN}Backup{RESET} resources created from {CYAN}manualBackups{RESET} before upgrading, as their spec is immutable."
+                )
+
+    # 3. Check legacy cnpg-main-urls secretKeyRef
+    raw_yaml = yaml.dump(values)
+    if "cnpg-main-urls" in raw_yaml:
+        msg = (
+            f"{BOLD}[Removed Secret 'cnpg-main-urls']{RESET} Local values reference {RED}cnpg-main-urls{RESET} (e.g. key {RED}std{RESET}). "
+            f"In Common-2026 (32.x), this secret is replaced by {GREEN}<release>-postgresqlcreds{RESET} (keys: {CYAN}url{RESET}, {CYAN}urlnossl{RESET}, {CYAN}jdbc{RESET}, {CYAN}plainhost{RESET}, etc.) "
+            f"or chart auto-binding via {CYAN}.Values.dependencies.postgresql.depconfig.creds{RESET}."
+        )
+        if on_common2026:
+            blockers.append(msg)
+        else:
+            warnings.append(msg)
+
+    # 4. Check other legacy top-level dependencies (redis, valkey, mariadb, mongodb, clickhouse, memcached)
+    for old_dep, new_dep in [("redis", "valkey"), ("valkey", "valkey"), ("mariadb", "mariadb"), ("mongodb", "mongodb"), ("clickhouse", "clickhouse"), ("memcached", "memcached")]:
+        dep_cfg = values.get(old_dep)
+        if isinstance(dep_cfg, dict) and dep_cfg.get("enabled") is True:
+            extra_note = ""
+            if new_dep in ("mariadb", "mongodb", "clickhouse"):
+                extra_note = f" {RED}WARNING:{RESET} {new_dep} uses a new containerforge image and volume layout—data is NOT automatically migrated (dump before upgrading and restore after)!"
+            msg = (
+                f"{BOLD}[Legacy '{old_dep}' Dependency Block]{RESET} Top-level {RED}{old_dep}{RESET} is replaced by {GREEN}dependencies.{new_dep}{RESET} in Common-2026.{extra_note}"
+            )
+            if on_common2026:
+                blockers.append(msg)
+            else:
+                warnings.append(msg)
+
+    return warnings, blockers
 def load_clusterenv():
     """Loads clusters/main/clusterenv.yaml and enforces that secrets are decrypted."""
     env_file = REPO_ROOT / "clusters" / "main" / "clusterenv.yaml"
@@ -214,6 +347,13 @@ def main():
 
     print(f"Commit range: {old_commit[:10] if old_commit else 'unknown'}..{new_commit[:10] if new_commit != 'HEAD' else 'HEAD'}")
 
+    old_chart_data = get_chart_info_at_commit(rel_chart_path, old_commit) if old_commit else {}
+    new_chart_data = get_chart_info_at_commit(rel_chart_path, new_commit)
+    old_common_ver = get_common_version(old_chart_data)
+    new_common_ver = get_common_version(new_chart_data)
+    if old_common_ver or new_common_ver:
+        print(f"Common Lib:  {YELLOW}{old_common_ver or 'unknown'}{RESET} → {GREEN}{new_common_ver or 'unknown'}{RESET}")
+
     # 3. Analyze differences in Chart.yaml and values.yaml
     if old_commit and new_commit:
         print(f"\n{BOLD}1. Dependency & App Changes (Chart.yaml):{RESET}")
@@ -256,17 +396,29 @@ def main():
     print(f"  Manifest: {CYAN}{local_manifest.relative_to(REPO_ROOT)}{RESET}")
     values = doc.get("spec", {}).get("values") or {}
 
+    # 4b. Common-2026 & CNPG Breaking Change Risk Analysis
+    warnings, blockers = analyze_common2026_risks(values, old_common_ver, new_common_ver)
+    if warnings or blockers:
+        print(f"\n{BOLD}4b. Common-2026 & Dependency Migration Analysis:{RESET}")
+        for b in blockers:
+            print(f"  {RED}✖ BLOCKER:{RESET} {b}")
+        for w in warnings:
+            print(f"  {YELLOW}⚠ WARNING:{RESET} {w}")
+
     # 5. Schema Validation
-    print(f"\n{BOLD}5. Schema Validation for New Version ({new_ver}):{RESET}")
-    # Run validator script
+    target_schema_ver = new_common_ver or "32.3.0"
+    print(f"\n{BOLD}5. Schema Validation for New Version ({new_ver}, common {target_schema_ver}):{RESET}")
+    # Run validator script against the target chart's common version
     val_script = REPO_ROOT / "scripts" / "validate-schemas.py"
-    res_val = subprocess.run([sys.executable, str(val_script), str(local_manifest), "--quiet"], capture_output=True, text=True)
-    if res_val.returncode == 0:
-        print(f"  {GREEN}✔ Schema validation passed!{RESET} Current values comply with the updated schema.")
+    val_cmd = [sys.executable, str(val_script), str(local_manifest), "--version", target_schema_ver, "--quiet"]
+    res_val = subprocess.run(val_cmd, capture_output=True, text=True)
+    if res_val.returncode == 0 and not blockers:
+        print(f"  {GREEN}✔ Schema validation passed!{RESET} Current values comply with common {target_schema_ver} schema.")
     else:
-        print(f"  {RED}✖ Schema validation failed on current values:{RESET}")
-        print(res_val.stdout)
-        print(f"  {YELLOW}Action required:{RESET} Fix the above schema violations before updating.")
+        print(f"  {RED}✖ Schema / Common-2026 validation failed on current values:{RESET}")
+        if res_val.stdout.strip():
+            print(res_val.stdout)
+        print(f"  {YELLOW}Action required:{RESET} Fix the above schema/deprecation violations before updating.")
 
     # 6. Helm Template Rendering Verification
     print(f"\n{BOLD}6. Helm Template Rendering Verification:{RESET}")
@@ -284,15 +436,36 @@ def main():
         with open(val_file, "w", encoding="utf-8") as f:
             yaml.dump(substituted_values, f)
 
-        cmd_template = ["helm", "template", chart, str(chart_dest), "-f", str(val_file), "--kube-version", "1.33.0"]
+        # Pass --api-versions barmancloud.cnpg.io/v1/ObjectStore because helm template runs offline without cluster API discovery,
+        # and Common-2026 requires this capability check when CNPG backups or recovery are enabled.
+        cmd_template = [
+            "helm", "template", chart, str(chart_dest),
+            "-f", str(val_file),
+            "--kube-version", "1.33.0",
+            "--api-versions", "barmancloud.cnpg.io/v1/ObjectStore",
+        ]
         res_template = subprocess.run(cmd_template, capture_output=True, text=True)
 
         if res_template.returncode == 0:
             print(f"  {GREEN}✔ Helm template succeeded!{RESET} The chart renders successfully with your configuration.")
-            safe_to_apply = True
+            safe_to_apply = (len(blockers) == 0)
         else:
             print(f"  {RED}✖ Helm template failed:{RESET}\n{res_template.stderr.strip()}")
             safe_to_apply = False
+
+        # Check live cluster for Barman Cloud plugin CRD if this chart uses CNPG backups/recovery on Common-2026
+        if new_common_ver and re.match(r"^(3[2-9]|[4-9]\d)\.", str(new_common_ver)):
+            raw_vals = yaml.dump(values)
+            if "postgresql" in raw_vals or "cnpg" in raw_vals:
+                crd_check = subprocess.run(
+                    ["kubectl", "get", "crd", "objectstores.barmancloud.cnpg.io"],
+                    capture_output=True, text=True
+                )
+                if crd_check.returncode != 0:
+                    print(
+                        f"  {YELLOW}⚠ Live Cluster Check:{RESET} CRD {BOLD}objectstores.barmancloud.cnpg.io{RESET} was not detected on the current cluster.\n"
+                        f"    Common-2026 requires {BOLD}plugin-barman-cloud{RESET} installed alongside the CloudNativePG operator when backups or recovery are enabled!"
+                    )
 
     # 7. Summary & Recommendation
     print("\n" + "=" * 60)
@@ -306,9 +479,16 @@ def main():
             content = local_manifest.read_text(encoding="utf-8")
             # Update version
             content = re.sub(r'version:\s*' + re.escape(old_ver), f"version: {new_ver}", content)
-            # Ensure schema header is present
+            # Ensure schema header is present and up-to-date
+            schema_header = f"# yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/{target_schema_ver}.schema.json"
             if "yaml-language-server: $schema" not in content:
-                content = "---\n# yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/30.4.4.schema.json\n" + content.lstrip("-\n")
+                content = f"---\n{schema_header}\n" + content.lstrip("-\n")
+            else:
+                content = re.sub(
+                    r"#\s*yaml-language-server:\s*\$schema=https://truecharts\.org/schemas/helm-release/[0-9\.]+\.schema\.json",
+                    schema_header,
+                    content,
+                )
             local_manifest.write_text(content, encoding="utf-8")
             print(f"{GREEN}✔ Successfully updated {local_manifest.relative_to(REPO_ROOT)} to version {new_ver}!{RESET}")
         else:

@@ -121,8 +121,13 @@ All core/system charts are already provided by ClusterTool 5.0. Port only these 
    - *(Optional)* `generic-device-plugin` if still needed
 
 #### Critical Adjustment for CNPG Restore (`authelia` and `lldap`)
-Before first bootstrap on the new cluster, check the current backup `revision` in `authelia/helm-release.yaml` (currently `"3"`) and `lldap/helm-release.yaml` (currently `"2"`), and configure **recovery mode** in `cluster-config-2027` so CNPG restores from Cloudflare R2 instead of initializing empty databases:
+Before first bootstrap on the new cluster, check the current backup `revision` in `authelia/helm-release.yaml` (currently `"3"`) and `lldap/helm-release.yaml` (currently `"2"`), and configure **recovery mode** in `cluster-config-2027` so CNPG restores from Cloudflare R2 instead of initializing empty databases.
 
+> **Important (Common 30.4.x vs. Common-2026 / 32.x):**
+> - If `authelia` (`34.x`) / `lldap` (`10.x`) are still pinned to **Common 30.4.x** at migration time, use the `cnpg.main` structure below.
+> - Once `authelia` / `lldap` release major chart updates moving to **Common-2026 (`32.x`)**, `cnpg.main` moves to `dependencies.postgresql` (`depconfig` + `operator`), in-tree Barman is replaced by the `plugin-barman-cloud` `ObjectStore` CRD (which ClusterTool 5.0 already installs in `cnpg-system`), `cnpg-main-urls` (key `std`) is replaced by `<release>-postgresqlcreds` (key `url`), and `dependencies.postgresql.operator.pgVersion: 16` **must** be explicitly pinned so CNPG doesn't attempt an unsupported cross-distro `pg_upgrade` to PostgreSQL 18 during recovery.
+
+**Option A — While Chart is on Common 30.4.x (`cnpg.main`):**
 - **`authelia`**:
   ```yaml
   cnpg:
@@ -152,7 +157,51 @@ Before first bootstrap on the new cluster, check the current backup `revision` i
         revision: "3"
   ```
 
-*(Note: Also verify whether TrueCharts Common has updated its CNPG templates for `plugin-barman-cloud` or still uses `barmanObjectStore` directly.)*
+**Option B — Once Chart Moves to Common-2026 / 32.x (`dependencies.postgresql`):**
+- **`authelia`**:
+  ```yaml
+  dependencies:
+    postgresql:
+      enabled: true
+      operator:
+        pgVersion: 16 # Pin to match existing PG 16 backup!
+        mode: recovery
+         cluster:
+          instances: 1
+          singleNode: true
+        recovery:
+          method: object_store
+          credentials: cloudflare
+          revision: "3"
+        backups:
+          enabled: true
+          credentials: cloudflare
+          revision: "4"
+  ```
+- **`lldap`** *(also remove custom `LLDAP_database_url` `cnpg-main-urls` env override so chart binds to `lldap-postgresqlcreds`)*:
+  ```yaml
+  dependencies:
+    postgresql:
+      enabled: true
+      depconfig:
+        postgresqlUsername: lldap
+        postgresqlDatabase: lldap
+        password: ${LLDAP_CNPG_PASSWORD}
+      operator:
+        pgVersion: 16 # Pin to match existing PG 16 backup!
+        mode: recovery
+        cluster:
+          instances: 1
+          singleNode: true
+        recovery:
+          method: object_store
+          credentials: cloudflare
+          revision: "2"
+        backups:
+          enabled: true
+          credentials: cloudflare
+          revision: "3"
+  ```
 
 ### Phase 3: Generate Kustomizations, Configs, Encrypt & Push
 1. Check `talos/patches/nodes/control-1/` (hostname `k8s-control-1`, `/24` prefix, disk selector, and any custom node labels if desired).

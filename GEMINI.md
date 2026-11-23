@@ -48,14 +48,16 @@ truecharts-config-2025/
 
 ---
 
-## 3. Schema Enforcement & The Common 30.4.x Upgrade
+## 3. Schema Enforcement & The Common 30.4.x / Common-2026 (32.x) Upgrades
 
-Starting with TrueCharts **Common Library 30.4.0+** (released Nov 2026), charts enforce **strict JSON Schema validation** on all `values.yaml` inputs. Previously ignored typos or obsolete parameters now cause hard Helm upgrade failures.
+Starting with TrueCharts **Common Library 30.4.0+** (released Nov 2026), charts enforce **strict JSON Schema validation** (`additionalProperties: false`) on all `values.yaml` inputs.
+
+With **Common-2026 (`32.0.0+`, currently `32.3.0`)**, TrueCharts introduced its largest breaking rework yet. Stable and incubator charts migrate to Common-2026 one by one via **major chart version bumps**.
 
 ### Schema References
 - **Hosted Flux HelmRelease Schema:**
   ```yaml
-  # yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/30.4.4.schema.json
+  # yaml-language-server: $schema=https://truecharts.org/schemas/helm-release/32.3.0.schema.json
   ```
   *(Add this at line 2 of `helm-release.yaml` files for in-editor autocompletion and live validation.)*
 - **Raw Website Schemas:**
@@ -63,21 +65,39 @@ Starting with TrueCharts **Common Library 30.4.0+** (released Nov 2026), charts 
   `https://raw.githubusercontent.com/trueforge-org/websites/refs/heads/main/truecharts/public/schemas/common/<version>.schema.json`
 - **Source Schemas in `code/truecharts-org/truecharts`:**
   - Full schema: `charts/library/common/values.schema.json`
-  - Modular definitions: `charts/library/common/schemas/` (`credentials.json`, `cnpg.json`, `persistence/`, etc.)
+  - Modular definitions: `charts/library/common/schemas/` (`credentials.json`, `dependencies.json`, `dependencies/postgresql/operator/`, `persistence/`, etc.)
 
-### Common Strict Schema Violations & Fixes
+### Common-2026 (`32.x`) Breaking Changes (Universal Dependencies & CNPG)
+
+1. **`cnpg.main` → `dependencies.postgresql`:**
+   - Top-level `cnpg`, `redis`, `valkey`, `mariadb`, `mongodb`, `clickhouse`, `memcached`, `solr`, and `volumeClaimTemplates` keys now **fail Helm rendering** (`tc.v1.common.values.deprecations`).
+   - All CNPG configuration moves under `dependencies.postgresql` (default `mode: operator`; spawns the same `<release>-cnpg-main` `Cluster` name):
+     - `enabled: true` → `dependencies.postgresql.enabled: true`
+     - `user`, `database`, `password` → `dependencies.postgresql.depconfig.{postgresqlUsername, postgresqlDatabase, password}`
+     - `pgVersion`, `mode: standalone | recovery`, `cluster`, `backups`, `recovery`, `monitoring`, `pooler` → `dependencies.postgresql.operator.*`
+2. **PostgreSQL 18 Default & Debian 13 (Trixie) Image Migration:**
+   - Common-2026 defaults to **PostgreSQL 18** (`-standard-trixie`). If `dependencies.postgresql.operator.pgVersion` is not set, CNPG automatically triggers an in-place `pg_upgrade` to PG 18.
+   - Because CNPG only supports `pg_upgrade` across images on the **same OS distribution**, always pin `dependencies.postgresql.operator.pgVersion: 16` when first upgrading a chart to Common-2026 so it transitions cleanly to Debian 13 on PG 16 first.
+3. **CNPG Barman Cloud Plugin Required (`plugin-barman-cloud`):**
+   - In-tree Barman (`barmanObjectStore`) is removed. Backups and object store recovery now spawn `barmancloud.cnpg.io/v1` `ObjectStore` resources and require **`plugin-barman-cloud`** installed in the CNPG operator namespace (plus CNPG `>= 1.26` and `cert-manager`).
+   - Offline `helm template` runs with backups/recovery enabled must pass `--api-versions barmancloud.cnpg.io/v1/ObjectStore`.
+   - `destinationPath`, `serverName`, and `revision` remain identical (`s3://<bucket>/<release>/cnpg`), so existing R2 backups work seamlessly.
+4. **Secret & Credentials Rename (`cnpg-main-urls` → `<release>-postgresqlcreds`):**
+   - The `cnpg-main-urls` Secret (key `std`) and `.Values.cnpg.main.creds` are replaced by `<release>-postgresqlcreds` (key `url`, `urlnossl`, `jdbc`, `plainhost`, `postgresql-password`) and `.Values.dependencies.postgresql.depconfig.creds`.
+
+### Common 30.4.x+ Strict Schema Violations & Fixes
 
 1. **`credentials.<target>.name`**:
    - **Error:** `Additional properties are not allowed ('name' was unexpected)`
    - **Cause:** Credentials map keys (`credentials.cloudflare:`) define the name. A nested `name: cloudflare` property is redundant and disallowed (`additionalProperties: false`).
    - **Fix:** Remove `name: <target>` from the credentials block.
 
-2. **`cnpg.<target>.recovery.enabled`**:
+2. **`recovery.enabled`**:
    - **Error:** `Additional properties are not allowed ('enabled' was unexpected)`
-   - **Cause:** CNPG operation mode is toggled by `mode: standalone | replica | recovery`. The `recovery:` block does NOT have an `enabled: false` flag.
+   - **Cause:** CNPG operation mode is toggled by `mode: standalone | recovery`. The `recovery:` block does NOT have an `enabled: false` flag.
    - **Fix:** When running in `mode: standalone`, remove the entire `recovery:` block (or remove `enabled: false`).
 
-3. **`cnpg.<target>.backups.retentionPolicy`**:
+3. **`backups.retentionPolicy`**:
    - **Error:** `'' does not match '^[1-9][0-9]*[dwm]$'`
    - **Cause:** An empty string `""` violates the regex format.
    - **Fix:** Remove `retentionPolicy` entirely or supply a valid duration (e.g., `30d`, `4w`).

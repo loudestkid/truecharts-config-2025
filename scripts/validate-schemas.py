@@ -40,8 +40,27 @@ GITHUB_API_SCHEMAS_URL = "https://api.github.com/repos/trueforge-org/websites/co
 RAW_SCHEMA_BASE_URL = "https://raw.githubusercontent.com/trueforge-org/websites/refs/heads/main/truecharts/public/schemas/common"
 
 
-def get_latest_schema_version(quiet=False):
-    """Detects the latest published schema version from GitHub, local chart, or fallback."""
+def get_latest_schema_version(quiet=False, prefer_local_charts=True):
+    """Detects the schema version to use from local charts, GitHub, or fallback."""
+    # 0. When validating local manifests without an explicit --version, check the common version
+    # actually used by the stable charts in the adjacent truecharts repo (e.g. 30.4.5) so we don't
+    # prematurely enforce Common-2026 (32.x) on charts still pinned to 30.4.x.
+    if prefer_local_charts:
+        stable_candidates = [
+            Path(__file__).resolve().parent.parent.parent / "truecharts-org" / "truecharts" / "charts" / "stable" / "authelia" / "Chart.yaml",
+            Path("/home/andrew/code/truecharts-org/truecharts/charts/stable/authelia/Chart.yaml"),
+        ]
+        for sc in stable_candidates:
+            if sc.is_file():
+                try:
+                    with open(sc, "r", encoding="utf-8") as f:
+                        c_data = yaml.safe_load(f) or {}
+                    for dep in c_data.get("dependencies", []) or []:
+                        if isinstance(dep, dict) and dep.get("name") == "common" and dep.get("version"):
+                            return str(dep["version"])
+                except Exception:
+                    pass
+
     # 1. Try GitHub API
     try:
         resp = requests.get(
@@ -78,12 +97,12 @@ def get_latest_schema_version(quiet=False):
             except Exception:
                 pass
 
-    # 3. Default known fallback
+    # 3. Default known fallback (stable charts currently use 30.4.5 until migrated to 32.x)
     return "30.4.5"
 
 
 def fetch_schema(version, refresh=False, quiet=False):
-    """Fetches schema from cache or downloads from TrueCharts website repo."""
+    """Fetches schema from cache, local truecharts repo, or downloads from TrueCharts website repo."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache_file = CACHE_DIR / f"{version}.common.schema.json"
 
@@ -92,6 +111,25 @@ def fetch_schema(version, refresh=False, quiet=False):
             print(f"{GRAY}Using cached schema for version {version} ({cache_file}){RESET}")
         with open(cache_file, "r", encoding="utf-8") as f:
             return json.load(f), version
+
+    # Check local TrueCharts repository if it matches the requested version
+    local_common_dir = Path("/home/andrew/code/truecharts-org/truecharts/charts/library/common")
+    local_chart_yaml = local_common_dir / "Chart.yaml"
+    local_schema_file = local_common_dir / "values.schema.json"
+    if not refresh and local_chart_yaml.is_file() and local_schema_file.is_file():
+        try:
+            with open(local_chart_yaml, "r", encoding="utf-8") as f:
+                c_data = yaml.safe_load(f)
+            if c_data and str(c_data.get("version")) == str(version):
+                if not quiet:
+                    print(f"{GRAY}Using local TrueCharts repo schema for version {version} ({local_schema_file}){RESET}")
+                with open(local_schema_file, "r", encoding="utf-8") as f:
+                    schema = json.load(f)
+                with open(cache_file, "w", encoding="utf-8") as f:
+                    json.dump(schema, f, indent=2)
+                return schema, version
+        except Exception:
+            pass
 
     schema_url = f"{RAW_SCHEMA_BASE_URL}/{version}.schema.json"
     if not quiet:
@@ -108,7 +146,93 @@ def fetch_schema(version, refresh=False, quiet=False):
     return schema, version
 
 
-def validate_values(validator, values, name, location):
+def check_common2026_deprecations(values, schema_version=None):
+    """
+    Checks for Common-2026 (32.0.0+) template-level deprecations and removed top-level keys.
+    Because the root values.schema.json leaves additionalProperties: true for app-specific keys,
+    JSON schema validation alone does not catch enabled legacy dependency keys (cnpg, redis, valkey,
+    mariadb, mongodb, clickhouse, memcached, solr) or volumeClaimTemplates — those fail inside
+    Helm templates (tc.v1.common.values.deprecations).
+    """
+    errors = []
+    if not isinstance(values, dict):
+        return errors
+
+    # Only enforce Common-2026 deprecation checks when validating against schema >= 32.0.0
+    is_common_2026 = False
+    if schema_version:
+        m = re.search(r"(\d+\.\d+\.\d+)", str(schema_version))
+        if m and parse_version(m.group(1)) >= parse_version("32.0.0"):
+            is_common_2026 = True
+
+    if not is_common_2026:
+        return errors
+
+    # 1. Check cnpg.<name> or cnpg.enabled
+    cnpg = values.get("cnpg")
+    if isinstance(cnpg, dict):
+        for k, v in cnpg.items():
+            if isinstance(v, dict) and v.get("enabled", True) is not False:
+                errors.append({
+                    "path": f"/cnpg/{k}",
+                    "message": f"Legacy top-level 'cnpg.{k}' is removed in Common-2026 (32.0.0+).",
+                    "hint": (
+                        f" ({YELLOW}Hint:{RESET} Move to 'dependencies.postgresql': set 'enabled: true', "
+                        f"move user/database/password to 'dependencies.postgresql.depconfig' as "
+                        f"'postgresqlUsername'/'postgresqlDatabase'/'password', and move cluster/backups/recovery/pgVersion "
+                        f"to 'dependencies.postgresql.operator'. Pin 'pgVersion: 16' to avoid auto-upgrading to PG 18, "
+                        f"and ensure 'plugin-barman-cloud' is installed in the cluster)"
+                    ),
+                })
+
+    # 2. Check other moved top-level dependencies
+    moved_deps = {
+        "redis": "valkey",
+        "valkey": "valkey",
+        "mariadb": "mariadb",
+        "mongodb": "mongodb",
+        "clickhouse": "clickhouse",
+        "memcached": "memcached",
+    }
+    for old_key, new_dep in moved_deps.items():
+        dep_block = values.get(old_key)
+        if isinstance(dep_block, dict) and dep_block.get("enabled") is True:
+            errors.append({
+                "path": f"/{old_key}",
+                "message": f"Legacy top-level '{old_key}' is removed in Common-2026 (32.0.0+).",
+                "hint": f" ({YELLOW}Hint:{RESET} Move to 'dependencies.{new_dep}' and credentials to 'dependencies.{new_dep}.depconfig')",
+            })
+
+    # 3. Check removed solr and volumeClaimTemplates
+    if isinstance(values.get("solr"), dict) and values["solr"].get("enabled") is True:
+        errors.append({
+            "path": "/solr",
+            "message": "Top-level 'solr' dependency is removed in Common-2026 with no replacement.",
+            "hint": "",
+        })
+    if values.get("volumeClaimTemplates"):
+        errors.append({
+            "path": "/volumeClaimTemplates",
+            "message": "Top-level 'volumeClaimTemplates' is removed in Common-2026 (it never created a volume).",
+            "hint": f" ({YELLOW}Hint:{RESET} Use 'persistence' instead)",
+        })
+
+    # 4. Check for legacy cnpg-main-urls references in workload env
+    raw_yaml = yaml.dump(values)
+    if "cnpg-main-urls" in raw_yaml:
+        errors.append({
+            "path": "/workload (secretKeyRef: cnpg-main-urls)",
+            "message": "Secret 'cnpg-main-urls' (key 'std') is removed in Common-2026 (32.0.0+).",
+            "hint": (
+                f" ({YELLOW}Hint:{RESET} Replaced by secret '<release>-postgresqlcreds' (key 'url', 'urlnossl', 'jdbc', etc.) "
+                f"or '.Values.dependencies.postgresql.depconfig.creds')"
+            ),
+        })
+
+    return errors
+
+
+def validate_values(validator, values, name, location, schema_version=None):
     """Validates values dict using Draft7Validator, returns list of formatted error dicts."""
     if values is None:
         values = {}
@@ -121,16 +245,20 @@ def validate_values(validator, values, name, location):
         # Provide friendly hints for known common migration mistakes
         if "credentials" in path_str and "'name' was unexpected" in err.message:
             hint = f" ({YELLOW}Hint:{RESET} 'name' is not allowed in credential blocks; the block key is already the name)"
-        elif "cnpg" in path_str and "'enabled' was unexpected" in err.message and "recovery" in path_str:
-            hint = f" ({YELLOW}Hint:{RESET} recovery mode is toggled via cnpg.<name>.mode: 'recovery', not 'enabled: false')"
+        elif ("cnpg" in path_str or "postgresql" in path_str) and "'enabled' was unexpected" in err.message and "recovery" in path_str:
+            hint = f" ({YELLOW}Hint:{RESET} recovery mode is toggled via mode: 'recovery', not 'enabled: false')"
         elif "retentionPolicy" in path_str and err.message.endswith("does not match '^[1-9][0-9]*[dwm]$'"):
             hint = f" ({YELLOW}Hint:{RESET} retentionPolicy must be non-empty like '7d', '4w', '1m', or omitted)"
+        elif "barmanMode" in err.message or "backupName" in err.message:
+            hint = f" ({YELLOW}Hint:{RESET} 'barmanMode' and 'recovery.backupName' were removed in Common-2026; use Barman Cloud plugin with 'recovery.method: object_store')"
 
         errors.append({
             "path": path_str,
             "message": err.message,
             "hint": hint,
         })
+
+    errors.extend(check_common2026_deprecations(values, schema_version=schema_version))
     return errors
 
 
@@ -174,6 +302,30 @@ def collect_file_releases(paths, include_non_truecharts=False):
             if not is_truecharts and not include_non_truecharts:
                 continue
 
+            chart_common_version = None
+            if is_truecharts:
+                # Extract schema version from yaml-language-server comment header if present in file
+                try:
+                    raw_text = fpath.read_text(encoding="utf-8")
+                    m_schema = re.search(r"schemas/(?:helm-release|common)/(\d+\.\d+\.\d+)\.schema\.json", raw_text)
+                    if m_schema:
+                        chart_common_version = m_schema.group(1)
+                except Exception:
+                    pass
+                if chart_name:
+                    for train in ("stable", "incubator", "dependency", "library"):
+                        c_yaml = Path("/home/andrew/code/truecharts-org/truecharts/charts") / train / chart_name / "Chart.yaml"
+                        if c_yaml.is_file():
+                            try:
+                                with open(c_yaml, "r", encoding="utf-8") as cf:
+                                    c_data = yaml.safe_load(cf) or {}
+                                for dep in c_data.get("dependencies", []) or []:
+                                    if isinstance(dep, dict) and dep.get("name") == "common":
+                                        chart_common_version = str(dep.get("version", ""))
+                            except Exception:
+                                pass
+                            break
+
             metadata = doc.get("metadata", {})
             name = metadata.get("name", fpath.stem)
             namespace = metadata.get("namespace", "default")
@@ -184,6 +336,7 @@ def collect_file_releases(paths, include_non_truecharts=False):
                 "namespace": namespace,
                 "chart": chart_name,
                 "chart_version": chart_version,
+                "chart_common_version": chart_common_version,
                 "source": source_name,
                 "location": str(fpath),
                 "values": values,
@@ -282,6 +435,11 @@ def main():
         help="Force re-downloading schema even if cached locally",
     )
     parser.add_argument(
+        "--common-30",
+        action="store_true",
+        help="Validate only against the Common 30.4.x schema without triggering Common-2026 (32.x) deprecation errors on legacy cnpg/redis blocks",
+    )
+    parser.add_argument(
         "--quiet",
         "-q",
         action="store_true",
@@ -299,7 +457,7 @@ def main():
             schema = json.load(f)
         version_label = f"local file ({args.schema})"
     else:
-        version = args.version or get_latest_schema_version(quiet=args.quiet)
+        version = args.version or ("30.4.5" if args.common_30 else get_latest_schema_version(quiet=args.quiet))
         schema, version_label = fetch_schema(version, refresh=args.refresh, quiet=args.quiet)
 
     validator = jsonschema.Draft7Validator(schema)
@@ -336,7 +494,13 @@ def main():
         name = rel["name"]
         loc = rel["location"]
         chart_info = f"{rel['chart']}@{rel['chart_version']}" if rel["chart"] else "unknown"
-        errors = validate_values(validator, rel["values"], name, loc)
+        if args.common_30:
+            effective_schema_ver = "30.4.5"
+        elif args.version:
+            effective_schema_ver = args.version
+        else:
+            effective_schema_ver = rel.get("chart_common_version") or version_label
+        errors = validate_values(validator, rel["values"], name, loc, schema_version=effective_schema_ver)
 
         if errors:
             failed_count += 1

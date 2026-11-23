@@ -52,7 +52,8 @@ This automated script performs:
    - Validates the current manifest's `spec.values` against the new version's JSON schema using `./scripts/validate-schemas.py`.
 4. **Helm Template Verification:**
    - Pulls the new chart from `oci://oci.trueforge.org/truecharts/<chart>:<new>` into a temporary directory.
-   - Executes `helm template <chart> <dir> -f <values> --kube-version 1.33.0` to verify rendering without runtime errors.
+   - Executes `helm template <chart> <dir> -f <values> --kube-version 1.33.0 --api-versions barmancloud.cnpg.io/v1/ObjectStore` to verify rendering without runtime errors.
+   - Checks the live cluster for the `objectstores.barmancloud.cnpg.io` CRD if the chart uses PostgreSQL/CNPG on Common-2026 (`32.x`).
 
 ---
 
@@ -60,14 +61,76 @@ This automated script performs:
 
 Check for known breaking change patterns in TrueCharts upgrades:
 
-1. **Common Library 29.x → 30.x Major Bump:**
-   - **Strict Schema Enforcement:** Unknown or misplaced keys that were previously ignored will now cause hard failures.
+1. **Common-2026 (`30.4.x` → `32.x`) Major Rework (Universal Dependency System & CNPG):**
+   - **When it triggers:** Releasing `common 32.0.0+` does not change existing pinned charts immediately; each stable/incubator chart moves to Common-2026 via its own **major chart version bump**.
+   - **Universal Dependency System (`dependencies.<name>`):**
+     - Top-level `cnpg`, `redis`, `valkey`, `mariadb`, `mongodb`, `clickhouse`, `memcached`, and `solr` blocks are **removed** and now fail Helm rendering immediately (`tc.v1.common.values.deprecations`).
+     - All database/cache dependencies move under `dependencies.<name>` (`postgresql`, `valkey`, `mariadb`, `mongodb`, `clickhouse`, `memcached`), supporting `mode: standalone | operator`.
+     - Dependency images move from `dependencies.<name>.image` to root keys (`valkeyImage`, `mariadbImage`, `mongodbImage`, `clickhouseImage`, `memcachedImage`).
+     - **MariaDB, MongoDB, and ClickHouse Data Warning:** These now use TrueForge's own `containerforge` images (UID/GID 568, read-only rootfs) and a new volume/data layout. Data is **NOT** automatically migrated—you MUST dump the database before upgrading and restore after!
+   - **PostgreSQL (CNPG) Major Changes (`cnpg.main` → `dependencies.postgresql`):**
+     - **Structural Rewrite:** `cnpg.main` moves to `dependencies.postgresql` (which defaults to `mode: operator`, one CNPG cluster per release; the generated CNPG `Cluster` keeps the name `<release>-cnpg-main`).
+       - Move `enabled: true` to `dependencies.postgresql.enabled: true`.
+       - Move `user`, `database`, and `password` to `dependencies.postgresql.depconfig` as `postgresqlUsername`, `postgresqlDatabase`, and `password` (note: charts migrating to `dependencies.postgresql` default both `postgresqlUsername` and `postgresqlDatabase` to `app` unless overridden).
+       - Move all CNPG operator settings (`pgVersion`, `mode: standalone | recovery`, `cluster`, `backups`, `recovery`, `monitoring`, `pooler`, `hibernate`) under `dependencies.postgresql.operator`.
+     - **PostgreSQL 18 is the New Default (Automatic In-Place `pg_upgrade` Danger):**
+       - Without an explicit version set, Common-2026 defaults to **PostgreSQL 18** (`ghcr.io/cloudnative-pg/postgresql:18.x-standard-trixie` on Debian 13) and triggers an in-place `pg_upgrade`.
+       - **CRITICAL:** CloudNativePG only supports in-place `pg_upgrade` between images on the **same OS distribution**. Because Common-2026 also moves images from Debian 11/12 to **Debian 13 (Trixie)**, an existing cluster on an older image MUST stay on its current major version (`dependencies.postgresql.operator.pgVersion: 16`) during the chart upgrade to Debian 13 first, and only upgrade to `18` afterwards!
+     - **CNPG Barman Cloud Plugin Required (`plugin-barman-cloud`):**
+       - In-tree Barman (`Cluster.spec.backup.barmanObjectStore`) is **removed** in favor of the **CNPG Barman Cloud plugin** (`barman-cloud.cloudnative-pg.io`), spawning `ObjectStore` (`barmancloud.cnpg.io/v1`) resources (`<release>-cnpg-main-backup` and `<release>-cnpg-main-recovery`).
+       - **Cluster Prerequisite:** Requires CloudNativePG `>= 1.26` (`0.26+` chart), `cert-manager`, and the `plugin-barman-cloud` Helm chart installed in the CNPG operator namespace (`objectstores.barmancloud.cnpg.io` CRD). Rendering fails if backups or recovery are enabled and the `barmancloud.cnpg.io/v1/ObjectStore` API is missing (offline `helm template` must pass `--api-versions barmancloud.cnpg.io/v1/ObjectStore`).
+       - **Archive Compatibility:** `destinationPath`, `serverName`, and `revision` work identically (`s3://<bucket>/<release>/cnpg`, `<clusterName>-r<revision>`), so existing Cloudflare R2 backups remain usable without path changes.
+       - **Removed CNPG Keys:** `barmanMode`, `recovery.backupName`, `recovery.method: backup` (use `object_store`), `operator.verify`, and `type: timescaledb` are removed. Also, delete or rename any existing `Backup` resources created from `manualBackups` before upgrading because their spec is immutable.
+     - **Credentials & Secret Rename (`cnpg-main-urls` → `<release>-postgresqlcreds`):**
+       - The `cnpg-main-urls` Secret (key `std`) and `.Values.cnpg.main.creds` are **removed**!
+       - Replaced by Secret `<release>-postgresqlcreds` (keys: `url`, `urlnossl`, `jdbc`, `plainhost`, `plainporthost`, `postgresql-password`, etc.) and `.Values.dependencies.postgresql.depconfig.creds`.
+       - Check local `helm-release.yaml` `workload.main.podSpec.containers.main.env` (such as `LLDAP_database_url` in `lldap`) for any custom `secretKeyRef` pointing to `cnpg-main-urls` and update or remove it so chart defaults bind to `<release>-postgresqlcreds`.
+   - **Before vs. After CNPG Values Example:**
+     ```yaml
+     # BEFORE (Common 30.4.x):
+     cnpg:
+       main:
+         enabled: true
+         mode: standalone
+         pgVersion: 16
+         user: lldap
+         database: lldap
+         password: ${LLDAP_CNPG_PASSWORD}
+         cluster:
+           instances: 1
+           singleNode: true
+         backups:
+           enabled: true
+           credentials: cloudflare
+           revision: "2"
+
+     # AFTER (Common-2026 / 32.x):
+     dependencies:
+       postgresql:
+         enabled: true
+         depconfig:
+           postgresqlUsername: lldap
+           postgresqlDatabase: lldap
+           password: ${LLDAP_CNPG_PASSWORD}
+         operator:
+           mode: standalone
+           pgVersion: 16 # Pin to 16 first during Debian 13 image transition!
+           cluster:
+             instances: 1
+             singleNode: true
+           backups:
+             enabled: true
+             credentials: cloudflare
+             revision: "2"
+     ```
+
+2. **Common Library 29.x → 30.4.x Strict Schema Rules (Still Enforced in 32.x):**
+   - **Closed JSON Schema (`additionalProperties: false`):** Unknown or removed keys (legacy probes, `ingress.autoLink`, `global.ignoreIsStopped`, `securityContext.container.fsGroup`, env-lists, top-level `volumeClaimTemplates`) fail rendering.
+   - **Strict Boolean Typing:** Quoted strings like `"false"` on boolean keys that do not support `tpl` now fail validation.
    - **`credentials.<name>.name`:** Disallowed redundant property (remove `name: <name>`).
-   - **`cnpg.<name>.recovery.enabled`:** Disallowed property (mode is controlled via `mode: standalone | recovery`).
-   - **`cnpg.<name>.backups.retentionPolicy: ""`:** Cannot be empty string (remove or supply valid duration like `30d`).
-2. **Subchart Upgrades:**
-   - e.g. `valkey` (Redis replacement) 2.x → 3.x (check persistence/password format).
-   - `cnpg` PostgreSQL version bumps (check if major version migration is required).
+   - **`recovery.enabled`:** Disallowed property (mode is controlled via `operator.mode: standalone | recovery`).
+   - **`backups.retentionPolicy: ""`:** Cannot be empty string (remove or supply valid duration like `30d`).
+
 3. **Upstream Application Binary Jump:**
    - If `appVersion` changed (e.g. major release of Plex, Blocky, Authelia), review if the app itself has migration steps or deprecations.
 
