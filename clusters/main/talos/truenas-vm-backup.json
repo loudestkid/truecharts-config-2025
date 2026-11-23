@@ -1,28 +1,62 @@
 {
   "schema_version": 1,
-  "captured_at": "2026-11-21T22:32:23.137238+00:00",
+  "captured_at": "2026-11-22T15:43:39.391141+00:00",
   "truenas_host": "192.168.1.80",
-  "truenas_version": "TrueNAS-SCALE-24.10.2.4",
+  "truenas_version": "TrueNAS-25.10.8",
   "update_trains": {
     "trains": {
-      "TrueNAS-SCALE-ElectricEel": {
-        "description": "TrueNAS SCALE ElectricEel 24.10 [release]"
+      "TrueNAS-SCALE-GoldEye-Nightlies": {
+        "description": "TrueNAS SCALE GoldEye 25.10 Nightlies [developer only]"
       },
-      "TrueNAS-SCALE-Fangtooth": {
-        "description": "TrueNAS SCALE Fangtooth 25.04 [release]"
+      "TrueNAS-SCALE-Goldeye-BETA": {
+        "description": "TrueNAS SCALE Goldeye 25.10 BETA"
+      },
+      "TrueNAS-SCALE-Goldeye-RC": {
+        "description": "TrueNAS SCALE Goldeye 25.10 RC"
       },
       "TrueNAS-SCALE-Goldeye": {
         "description": "TrueNAS SCALE Goldeye 25.10"
+      },
+      "TrueNAS-SCALE-Halfmoon-Nightlies": {
+        "description": "TrueNAS SCALE Halfmoon 26.04 Nightlies [developer only]",
+        "stable": false,
+        "max_profile": "DEVELOPER"
+      },
+      "TrueNAS-26-BETA": {
+        "description": "TrueNAS 26 BETA",
+        "stable": false,
+        "max_profile": "EARLY_ADOPTER"
+      },
+      "TrueNAS-26-Nightlies": {
+        "description": "TrueNAS 26 Nightlies [developer only]",
+        "stable": false,
+        "max_profile": "DEVELOPER"
+      },
+      "TrueNAS-27-RC": {
+        "description": "TrueNAS 27 RC",
+        "stable": false,
+        "max_profile": "EARLY_ADOPTER"
+      },
+      "TrueNAS-27-Nightlies": {
+        "description": "TrueNAS 27 Nightlies [developer only]",
+        "stable": false,
+        "max_profile": "DEVELOPER"
       }
     },
-    "current": "TrueNAS-SCALE-ElectricEel",
-    "selected": "TrueNAS-SCALE-ElectricEel"
+    "trains_redirection": {
+      "TrueNAS-27-Nightlies": "TrueNAS-28-Nightlies",
+      "TrueNAS-26-Nightlies": "TrueNAS-27-Nightlies",
+      "TrueNAS-SCALE-Halfmoon-Nightlies": "TrueNAS-26-Nightlies",
+      "TrueNAS-SCALE-Goldeye-BETA": "TrueNAS-SCALE-Goldeye",
+      "TrueNAS-SCALE-Goldeye-RC": "TrueNAS-SCALE-Goldeye",
+      "TrueNAS-26-BETA": "TrueNAS-27-RC"
+    }
   },
   "pools": [
     {
       "name": "boot-pool",
       "size": "1.80T",
-      "alloc": "15.9G",
+      "alloc": "22.0G",
       "free": "1.78T",
       "health": "ONLINE"
     },
@@ -30,101 +64,95 @@
       "name": "main",
       "size": "102T",
       "alloc": "14.2T",
-      "free": "87.7T",
+      "free": "87.6T",
       "health": "ONLINE"
     }
   ],
-  "zvols": {
-    "main/talos-zvol": {
-      "properties": [
-        "main/talos-zvol",
-        "290G",
-        "62.2T",
-        "290G",
-        "512G"
-      ],
-      "snapshots": []
-    }
-  },
+  "zvols": {},
   "vms": [
     {
-      "id": 12,
+      "command_line_args": "",
+      "cpu_mode": "HOST-MODEL",
+      "cpu_model": null,
       "name": "talos",
       "description": "",
       "vcpus": 1,
-      "memory": 65536,
-      "min_memory": null,
-      "autostart": true,
-      "time": "LOCAL",
-      "bootloader": "UEFI",
       "cores": 5,
       "threads": 2,
-      "hyperv_enlightenments": false,
-      "shutdown_timeout": 90,
-      "cpu_mode": "HOST-MODEL",
-      "cpu_model": null,
       "cpuset": "",
       "nodeset": "",
+      "enable_cpu_topology_extension": false,
       "pin_vcpus": false,
-      "hide_from_msr": false,
       "suspend_on_snapshot": false,
+      "trusted_platform_module": false,
+      "memory": 65536,
+      "min_memory": null,
+      "hyperv_enlightenments": false,
+      "bootloader": "UEFI",
+      "bootloader_ovmf": "OVMF_CODE.fd",
+      "autostart": true,
+      "hide_from_msr": false,
       "ensure_display_device": true,
+      "time": "LOCAL",
+      "shutdown_timeout": 90,
       "arch_type": null,
       "machine_type": null,
       "uuid": "2a9aa883-d75f-4905-9960-c96f27e9c5c2",
-      "command_line_args": "",
-      "bootloader_ovmf": "OVMF_CODE.fd",
-      "trusted_platform_module": false,
-      "enable_cpu_topology_extension": false,
       "devices": [
         {
           "id": 57,
-          "dtype": "DISK",
           "attributes": {
+            "dtype": "DISK",
             "path": "/dev/zvol/main/talos-zvol",
             "type": "VIRTIO",
-            "physical_sectorsize": null,
+            "create_zvol": false,
+            "zvol_name": null,
+            "zvol_volsize": null,
             "logical_sectorsize": null,
-            "iotype": "THREADS"
+            "physical_sectorsize": null,
+            "iotype": "THREADS",
+            "serial": "TMNcpkmg"
           },
-          "order": 1001,
-          "vm": 12
+          "vm": 12,
+          "order": 1001
         },
         {
           "id": 58,
-          "dtype": "NIC",
           "attributes": {
+            "dtype": "NIC",
+            "trust_guest_rx_filters": false,
             "type": "VIRTIO",
-            "mac": "00:a0:98:41:4f:cf",
             "nic_attach": "br001",
-            "trust_guest_rx_filters": false
+            "mac": "00:a0:98:41:4f:cf"
           },
-          "order": 1002,
-          "vm": 12
+          "vm": 12,
+          "order": 1002
         },
         {
           "id": 60,
-          "dtype": "DISPLAY",
           "attributes": {
+            "dtype": "DISPLAY",
+            "resolution": "1024x768",
             "port": 5900,
+            "web_port": 5901,
             "bind": "0.0.0.0",
+            "wait": false,
             "password": "REDACTED_ON_BACKUP",
             "web": true,
-            "type": "SPICE",
-            "resolution": "1024x768",
-            "web_port": 5901,
-            "wait": false
+            "type": "SPICE"
           },
-          "order": 1002,
-          "vm": 12
+          "vm": 12,
+          "order": 1002
         }
       ],
       "display_available": true,
+      "id": 12,
       "status": {
         "state": "RUNNING",
-        "pid": 7320,
+        "pid": 7273,
         "domain_state": "RUNNING"
-      }
+      },
+      "enable_secure_boot": false
     }
   ]
 }
