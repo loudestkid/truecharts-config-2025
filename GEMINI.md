@@ -159,4 +159,14 @@ helm template authelia ./authelia -f values.yaml --kube-version 1.33.0
 2. **Fixed Releases:**
    - `authelia`: Cleaned up schema header, removed `credentials.cloudflare.name`, removed redundant `recovery:` block. Successfully deployed and running.
    - `lldap`: Switched to `mode: standalone`, removed redundant `recovery:` block, removed empty `retentionPolicy: ""`, removed `credentials.cloudflare.name`, and removed redundant `LLDAP_JWT_SECRET` override so chart auto-binding takes over.
-   - Removed obsolete `name: cloudflare` from credentials in: `filebrowser`, `calibre`, `jackett`, `kavita`, `plex`, `qbittorrent-main`, `radarr`, `sonarr`, `recipes`, and `wedding`.
+   - **Removed Unused Releases & Routes:**
+   - Removed `sites/andrew`, `media/minio`, and `media/calibre` (and cleaned up their Cloudflare Zero Trust tunnel routes and DNS records).
+   - Enabled VolSync `ReplicationSource` backups (`src.enabled: true`) for `filebrowser` (`config` and `database`) and disabled unused `persistence.manga` PVC on `kavita`.
+
+---
+
+## 6. Upcoming ClusterTool 5.0 Migration (`cluster-config-2027`)
+
+- **Migration Plan Document:** See [`CLUSTERTOOL_MIGRATION.md`](./CLUSTERTOOL_MIGRATION.md) for the complete architecture comparison, secret mapping rules, CNPG recovery configuration, and step-by-step migration checklist.
+- **Target Repository:** `/home/andrew/code/cluster-config-2027` (`git@github.com:loudestkid/cluster-config-2027.git`)
+- **Instructions for AI Assistants:** When the user indicates that ClusterTool 5.0 stable is released and ready to initialize in `/home/andrew/code/cluster-config-2027`, **read [`CLUSTERTOOL_MIGRATION.md`](./CLUSTERTOOL_MIGRATION.md) first** before running any commands.
