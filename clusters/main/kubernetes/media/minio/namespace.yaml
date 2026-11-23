@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: minio
-## Add this part when you need a privileged namespace
-#  labels:
-#    pod-security.kubernetes.io/enforce: privileged
