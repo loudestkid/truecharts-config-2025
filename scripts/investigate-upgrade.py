@@ -3,7 +3,7 @@
 Major Version Upgrade Investigator for TrueCharts & Flux
 
 Parses Renovate upgrade strings (e.g. "chore(flux): update image blocky 22.25.1 → 24.1.2"),
-inspects git diffs in code/truecharts between the two versions, validates local manifests
+inspects git diffs in code/truecharts-org/truecharts between the two versions, validates local manifests
 against the new schema, and tests helm template rendering.
 """
 
@@ -33,7 +33,7 @@ CYAN = "\033[36m"
 GRAY = "\033[90m"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TRUECHARTS_REPO = Path("/home/andrew/code/truecharts")
+TRUECHARTS_REPO = Path("/home/andrew/code/truecharts-org/truecharts")
 
 
 def parse_upgrade_string(text):
@@ -197,7 +197,7 @@ def main():
     print(f"Upgrade:     {YELLOW}{old_ver}{RESET} → {GREEN}{new_ver}{RESET}")
     print("=" * 60)
 
-    # 1. Locate in code/truecharts
+    # 1. Locate in code/truecharts-org/truecharts
     chart_dir, train = find_chart_dir_in_truecharts(chart)
     if not chart_dir:
         sys.exit(f"{RED}Error:{RESET} Chart '{chart}' not found in {TRUECHARTS_REPO}/charts/")

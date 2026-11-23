@@ -11,12 +11,13 @@ This file serves as the persistent project manual for AI coding assistants (Anti
 - **Cluster Deployment Mechanism:**
   - Flux periodically reconciles manifests against git.
   - Manifests contain environment substitutions (e.g. `${VOLSYNC_ACCESS_KEY}`, `${AUTHELIA_IP}`, `${DOMAIN_0}`) which are resolved cluster-side before Helm renders and deploys the charts.
-- **Upstream Chart Catalog (`code/truecharts`):**
-  - Path: `/home/andrew/code/truecharts`
+- **Upstream Chart Catalog & Tooling (`code/truecharts-org`):**
+  - TrueCharts Catalog Path: `/home/andrew/code/truecharts-org/truecharts`
+  - ClusterTool Path: `/home/andrew/code/truecharts-org/clustertool`
   - Fork remote: `origin` (`git@github.com:loudestkid/truecharts.git`)
   - Upstream remote: `upstream` (`https://github.com/trueforge-org/truecharts.git`)
   - OCI Registry: `oci://oci.trueforge.org/truecharts`
-  - When investigating chart templates, default values, or schemas, refer to `/home/andrew/code/truecharts`. Remember to keep `master` synced with `upstream/master` and pushed to `origin/master`.
+  - When investigating chart templates, default values, or schemas, refer to `/home/andrew/code/truecharts-org/truecharts`. Remember to keep `master` synced with `upstream/master` and pushed to `origin/master`.
 
 ---
 
@@ -60,7 +61,7 @@ Starting with TrueCharts **Common Library 30.4.0+** (released Nov 2026), charts 
 - **Raw Website Schemas:**
   `https://raw.githubusercontent.com/trueforge-org/websites/refs/heads/main/truecharts/public/schemas/helm-release/<version>.schema.json`
   `https://raw.githubusercontent.com/trueforge-org/websites/refs/heads/main/truecharts/public/schemas/common/<version>.schema.json`
-- **Source Schemas in `code/truecharts`:**
+- **Source Schemas in `code/truecharts-org/truecharts`:**
   - Full schema: `charts/library/common/values.schema.json`
   - Modular definitions: `charts/library/common/schemas/` (`credentials.json`, `cnpg.json`, `persistence/`, etc.)
 

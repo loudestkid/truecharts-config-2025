@@ -41,7 +41,7 @@ Execute the built-in investigation script:
 ```
 
 This automated script performs:
-1. **Upstream Chart Inspection in `/home/andrew/code/truecharts`:**
+1. **Upstream Chart Inspection in `/home/andrew/code/truecharts-org/truecharts`:**
    - Finds the commit range between `<old>` and `<new>`.
    - Diffs `Chart.yaml` to detect underlying library bumps (e.g. Common `29.x` → `30.x`, Valkey `2.x` → `3.x`, or upstream app version jumps).
    - Diffs `values.yaml` to see default value changes or removed configuration keys.

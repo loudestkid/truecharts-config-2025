@@ -65,8 +65,8 @@ def get_latest_schema_version(quiet=False):
 
     # 2. Try adjacent truecharts repo Chart.yaml if available
     chart_candidates = [
-        Path(__file__).resolve().parent.parent.parent / "truecharts" / "charts" / "library" / "common" / "Chart.yaml",
-        Path("/home/andrew/code/truecharts/charts/library/common/Chart.yaml"),
+        Path(__file__).resolve().parent.parent.parent / "truecharts-org" / "truecharts" / "charts" / "library" / "common" / "Chart.yaml",
+        Path("/home/andrew/code/truecharts-org/truecharts/charts/library/common/Chart.yaml"),
     ]
     for candidate in chart_candidates:
         if candidate.is_file():
